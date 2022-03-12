@@ -1,7 +1,9 @@
 # Linux 環境構築
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/natsume6075/setup/master/linux/setup.sh | bash
+curl -sSLo setup.sh https://raw.githubusercontent.com/natsume6075/setup/master/linux/setup.sh
+bash setup.sh
+rm setup.sh
 ```
 
 上のコマンドを実行すると、以下ができる。
