@@ -13,7 +13,27 @@ rm setup.sh
     - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。
 - lib/ 中の各 setup.sh を実行
 
-## その他やること
+## そのた自動化していないこと
 
-echo set fish as default shell: chsh - which fish
+### デフォルトシェルの設定
+chsh - which fish
+
+### ssh key の用意と登録
+
+```bash
+cd
+mkdir .ssh
+cd .ssh
+ssh-keygen
+```
+
+```bash
+cat id_rsa.pub | clip.exe
+clip < id_rsa.pub
+pbcopy < id_rsa.pub
+```
+
+github で登録
+
+- Settings > SSH and GPG keys > New SSH key
 
