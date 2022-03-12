@@ -15,7 +15,7 @@ function GetConfirmation() {
 
 function PrepareLibWithDropbox() {
     dropbox start -i
-    LIB_DIRECTORY="~/Dropbox/lib"
+    LIB_DIRECTORY="${HOME}/Dropbox/lib"
 }
 
 function PrepareLibWithoutDropbox() {
@@ -50,8 +50,9 @@ else
     PrepareLibWithoutDropbox
 fi
 
+# Traverse all setup.sh.
 for app in "${AppToSetup[@]}"
 do
-    echo $app
+    bash $LIB_DIRECTORY/$app/setup.sh
 done
 
