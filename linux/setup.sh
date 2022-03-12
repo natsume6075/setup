@@ -14,8 +14,13 @@ function GetConfirmation() {
 }
 
 function PrepareLibWithDropbox() {
-    dropbox start -i
-    LIB_DIRECTORY="${HOME}/Dropbox/lib"
+    if [ -d ${HOME}/Dropbox/lib ] ; then
+        LIB_DIRECTORY="${HOME}/Dropbox/lib"
+    else
+        echo "まだ ~/Dropbox/lib が存在しません。以下を実行して同期を待った後、再実行してください。"
+        echo "dropbox start -i"
+        exit 0
+    fi
 }
 
 function PrepareLibWithoutDropbox() {
