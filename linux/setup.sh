@@ -53,6 +53,9 @@ fi
 # Traverse all setup.sh.
 for app in "${AppToSetup[@]}"
 do
+    echo ""
+    echo "--- start setup $app ---"
     bash $LIB_DIRECTORY/$app/setup.sh
+    echo "--- finish setup $app ---"
 done
 
