@@ -3,7 +3,7 @@ AppsToInstall="fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox python3-
 AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
-    echo "$1 (y/n)"
+    echo -e "$1 (y/n)"
     read input
     if [ "$input" = 'y' ] ; then
         return 1
@@ -44,7 +44,8 @@ function PrepareLibWithoutDropbox() {
 
 
 # If necessary, install apps by apt.
-if ! GetConfirmation "Install many many apps by apt?" ; then
+if ! GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
+
     # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
     sudo add-apt-repository ppa:neovim-ppa/unstable
 
