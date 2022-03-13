@@ -1,0 +1,117 @@
+[
+    /*
+     * Location:
+     * Documentation
+     * https://code.visualstudio.com/docs/getstarted/keybindings
+     * https://code.visualstudio.com/docs/getstarted/keybindings#_when-clause-contexts
+     *
+     */
+
+    //----------------------------------------------------------
+    // エディターにフォーカスしている時の設定 (editor->editorへの移動)
+    //----------------------------------------------------------
+    // 実装箇所にコードジャンプ
+    {
+        "key": "ctrl+u ctrl+i",
+        "command": "editor.action.goToImplementation",
+        "when": "editorFocus"
+    },
+    // 宣言箇所に移動
+    {
+        "key": "ctrl+u ctrl+d",
+        "command": "editor.action.goToDeclaration",
+        "when": "editorFocus"
+    },
+    // 前のエディターに移動
+    {
+        "key": "ctrl+h",
+        "command": "workbench.action.previousEditor"
+    },
+    // 次のエディターに移動
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.nextEditor"
+    },
+    //----------------------------------------------------------
+    // 検索関連(* -> 検索UI)
+    //----------------------------------------------------------
+    // grep検索に入る
+    {
+        "key": "ctrl+u ctrl+g",
+        "command": "workbench.action.findInFiles",
+        "when": "!searchInputBoxFocus"
+    },
+    // 検索実行後の候補への移動
+    {
+        "key": "ctrl+n",
+        "command": "workbench.action.interactivePlayground.arrowDown",
+        "when": "interactivePlaygroundFocus && !editorTextFocus"
+    },
+    // ファイルの検索に入る
+    {
+        "key": "ctrl+u ctrl+u",
+        "command": "workbench.action.quickOpen"
+    },
+    //----------------------------------------------------------
+    // サイドバーのトグル(*->サイドバーへの移動)
+    //----------------------------------------------------------
+    {
+        "key": "ctrl+f",
+        "command": "workbench.view.explorer",
+        "when": "!filesExplorerFocus && vim.mode != 'SearchInProgressMode' && vim.mode == 'Normal'"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "workbench.action.toggleSidebarVisibility",
+        "when": "filesExplorerFocus && !searchViewletVisible && !inDebugMode && vim.mode != 'SearchInProgressMode' && vim.mode == 'Normal'"
+    },
+    //----------------------------------------------------------
+    // サイドバーでの操作
+    //----------------------------------------------------------
+    {
+        "key": "space",
+        "command": "filesExplorer.openFilePreserveFocus",
+        "when": "filesExplorerFocuse && explorerViewletVisible"
+    },
+    //----------------------------------------------------------
+    // vscodeのterminalのトグル(*->terminal)
+    //----------------------------------------------------------
+    {
+        "key": "ctrl+t",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "!terminalFocus && vim.mode != 'SearchInProgressMode' && vim.mode == 'Normal'"
+    },
+    {
+        "key": "ctrl+t",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminalFocus && vim.mode != 'SearchInProgressMode' && vim.mode == 'Normal'"
+    },
+    //----------------------------------------------------------
+    // panelのトグル(*->panel)
+    //----------------------------------------------------------
+    {
+        "key": "ctrl+p",
+        "command": "workbench.action.toggleActivityBarVisibility",
+        "when": "!panelFocus && vim.mode != 'SearchInProgressMode' && vim.mode != 'Insert'"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "workbench.action.toggleActivityBarVisibility",
+        "when": "panelFocus && vim.mode != 'SearchInProgressMode' && vim.mode != 'Insert'"
+    },
+    //----------------------------------------------------------
+    // Terminalの操作
+    //----------------------------------------------------------
+    // 前のターミナルに移動
+    {
+        "key": "ctrl+h",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus"
+    },
+    // 次のターミナルに移動
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus"
+    }
+]

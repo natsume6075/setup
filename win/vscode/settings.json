@@ -1,0 +1,104 @@
+{
+    "launch": {},
+
+    "files.autoSave": "afterDelay",             // 未保存ファイルの自動保存の制御 off/afterDelay/onFocusChange/onWindowChange
+    "files.autoSaveDelay": 1000,
+    "files.eol": "\n",                          // 改行文字 を \n
+    "files.autoGuessEncoding": true,            // 文字コードを自動的に判別
+    "files.exclude": {                          // エクスプローラから除外するファイル/フォルダ
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true
+    },
+    "files.associations": {
+                             // 拡張子と vscode のモードの関連付け
+        "*.sql": "sql"
+    },
+    "files.trimFinalNewlines": true,            // 保存時にファイルの最後に存在する空行を削除
+    "files.insertFinalNewline": true,           // 保存時にファイルの最後に空行を挿入(trimFinalNewlines と共存させると、末尾が1行のみになるように調整)
+    "files.trimTrailingWhitespace": true,       // 保存時に行の終端に存在する空白文字を削除
+
+    "window.restoreFullscreen": true,
+    "window.menuBarVisibility": "toggle",       // alt で menubar を表示、フォーカス失ったら非表示 (windows のみ)
+
+    "workbench.editor.showTabs": true,
+    "workbench.editor.tabSizing": "shrink",     // タブが多い場合に、タブの幅を小さくしてすべて表示
+    "workbench.statusBar.visible": true,
+    "workbench.sideBar.location": "left",
+
+    "explorer.confirmDragAndDrop": false,        // ファイル/フォルダの誤移動防止ダイアログの表示
+
+    "editor.wordWrap": "on",
+    "editor.insertSpaces": true,                // ソフトタブ
+    "editor.tabSize": 4,
+    "editor.rulers": [
+
+    ],                        // エディタ上に縦線を表示
+    "editor.showFoldingControls": "always",     // 行の折りたたみ記号の表示 (vim の folding が使える)
+    "editor.minimap.enabled": true,
+    "editor.minimap.maxColumn": 80,             // default: 80
+    "editor.minimap.showSlider":"always",       // 表示されている部分をミニマップ上で強調
+    "editor.roundedSelection": true,            // 選択範囲の角を丸める
+    "editor.renderWhitespace": "boundary",      // 空白文字を表示 (boundary:=単語間の単一スペースのみ非表示)
+    "editor.renderControlCharacters": false,    // 制御文字を表示
+    "editor.renderLineHighlight":"gutter",      // カーソルのある行のハイライティング all/gutter/line/none
+    "editor.fontFamily": "Ricty Diminished for Powerline",
+    "editor.links": true,                       // リンクのクリックを許可
+    "editor.dragAndDrop": false,                // 選択したコードをドラッグアンドドロップで移動
+    "editor.smoothScrolling": true,
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": true,
+        "strings": true
+    },
+    "editor.acceptSuggestionOnEnter": "off",
+    "editor.tabCompletion": "on",
+    "editor.tokenColorCustomizations": {
+        "comments": {
+            "fontStyle": ""
+        }
+    },
+
+    // vim local な keybindings は keybindings.json ではなくこちらに書く
+    "vim.vimrc.enable": true,
+    "vim.vimrc.path": "~/Dropbox/dotfiles/vscode/.vimrc",
+
+    "vim.leader": "<Space>",
+    "vim.hlsearch": true,
+    "vim.ignorecase": true,
+    "vim.incsearch":true,
+    "vim.easymotion": true,                     // <Leader><Leader><motion>
+    "vim.useCtrlKeys": true,                    // ctrl を使った操作を有効化
+    "vim.visualstar": true,                     // * でカーソル下にあるワードを検索
+    "vim.sneak": true,                          // s<Char><Char> でカーソル移動
+
+    // @sync os=mac
+    // // "vim.autoSwitchInputMethod.enable": true,
+    // @sync os=windows
+    // "vim.autoSwitchInputMethod.enable": true,
+
+    // "vim.autoSwitchInputMethod.defaultIM": "com.apple.keylcyout.US",
+    // "vim.autoSwitchInputMethod.obtainIMCmd": "/usr/local/bin/im-select",
+    // "vim.autoSwitchInputMethod.switchIMCmd": "/usr/local/bin/im-select {im}",
+
+    "terminal.integrated.shell.linux": "/usr/bin/fish",
+
+    "sync.gist": "ce33c1b393d1f5bac6de3d7802db7e19",
+    "breadcrumbs.enabled": false,
+
+    "revealjs.browserPath": "/mnt/c/Users/natsu/AppData/Local/Vivaldi/Application/vivaldi.exe",
+
+    "markdown.preview.fontFamily": "Ricty Diminished for Powerline",
+    "markdown.preview.breaks": true,
+    "[markdown]": {                             // markdown はなぜかデフォルトで suggetions が無効になっている
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": true,
+        "editor.snippetSuggestions": "top",
+        "editor.acceptSuggestionOnEnter": "off"
+    },
+    "editor.codeActionsOnSave": null,
+    "debug.onTaskErrors": "showErrors",
+    "workbench.activityBar.visible": false
+}
