@@ -1,5 +1,6 @@
 #!/bin/bash
-AppToSetup=(dotfiles nvim fish bin)
+AppsToInstall="fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox"
+AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
     echo "$1 (y/n)"
@@ -31,8 +32,8 @@ function PrepareLibWithoutDropbox() {
     LIB_DIRECTORY="./lib"
     mkdir lib
 
-    # Download all libraries included in AppToSetup from my repositories.
-    for app in "${AppToSetup[@]}"
+    # Download all libraries included in AppsToSetup from my repositories.
+    for app in "${AppsToSetup[@]}"
     do
         curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
         mkdir $LIB_DIRECTORY/$app
@@ -48,7 +49,7 @@ if ! GetConfirmation "Install many many apps by apt?" ; then
     sudo add-apt-repository ppa:neovim-ppa/unstable
 
     sudo apt update
-    sudo apt install -y fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox
+    sudo apt install -y $AppsToInstall
 fi
 
 # Download the library via Dropbox or curl, then set LIB_DIRECTORY.
@@ -59,7 +60,7 @@ else
 fi
 
 # Traverse all setup.sh.
-for app in "${AppToSetup[@]}"
+for app in "${AppsToSetup[@]}"
 do
     echo ""
     if ! GetConfirmation "Set up $app?" ; then
