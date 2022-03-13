@@ -44,6 +44,9 @@ function PrepareLibWithoutDropbox() {
 
 # If necessary, install apps by apt.
 if ! GetConfirmation "Install many many apps by apt?" ; then
+    # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
+    sudo add-apt-repository ppa:neovim-ppa/unstable
+
     sudo apt update
     sudo apt install -y fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox
 fi
