@@ -1,5 +1,7 @@
 # Linux 環境構築
 
+## 自動化スクリプト setup.sh
+
 ```bash
 curl -sSLo setup.sh https://raw.githubusercontent.com/natsume6075/setup/master/linux/setup.sh
 bash setup.sh
@@ -8,10 +10,14 @@ rm setup.sh
 
 上のコマンドを実行すると、以下ができる。
 
-- lib/ の準備
-    - Dropbox を使うなら、Dropbox をセットアップする。
-    - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。
-- lib/ 中の各 setup.sh を実行
+- アプリのインストール
+    - setup.sh で定義する変数 AppsToInstall のアプリがインストールされる
+- アプリのセットアップ
+    - setup.sh で定義する変数 AppsToSetup のアプリがセットアップされる
+    - lib/ の準備
+        - Dropbox を使うなら、Dropbox をセットアップする。
+        - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。
+    - lib/ 中の各 setup.sh を実行
 
 ## そのた自動化していないこと
 
