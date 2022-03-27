@@ -55,7 +55,7 @@ choco install -y keypirinha vivaldi vscode autohotkey googleJapaneseInput quickl
 個人用PCなら必須なソフトたち
 
 ``` shell
-choco install -y bitwarden evernote
+choco install -y bitwarden evernote anki mpc-hc
 ```
 
 必要に応じて入れれば良いソフトたち
