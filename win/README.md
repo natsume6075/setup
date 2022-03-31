@@ -2,7 +2,10 @@
 
 ## OS の設定
 
-以下で設定画面を開ける。コマンドで済ませたいが。。。
+以下で設定画面を開ける。
+
+別にあまり楽にならなずしゃらくさい。コマンドで済ませたいが。。。
+
 URIスキームは、以下のサイトが参考になる。
 https://www.atmarkit.co.jp/ait/articles/1707/11/news009_2.html
 
@@ -49,7 +52,7 @@ chocolatey でソフトをインストール
 必須なソフトたち
 
 ``` shell
-choco install -y keypirinha vivaldi vscode autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar
+choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar
 ```
 
 個人用PCなら必須なソフトたち
@@ -61,10 +64,11 @@ choco install -y bitwarden evernote anki mpc-hc
 必要に応じて入れれば良いソフトたち
 
 ``` shell
-choco install -y pandoc xmind steam
+choco install -y pandoc xmind steam adb
 ```
 
 WSL Linux コントリビューション
+
 choco search ubuntu して、新しいの入れる
 
 ## WSL 設定
@@ -84,15 +88,18 @@ mountFsTab = true
 
 ### linux に入る
 
-ubuntu アプリを起動
-アカウント情報入れる
-terminal でプロファイルが参照できるようになる
+- ubuntu アプリを起動
+- アカウント情報入れる
+- terminal でプロファイルが参照できるようになる
 
 ## Windows-Termianl 設定
 
 @TODO
+
 /mnt/c/Users/natsu/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/
+
 の中身を、Dropbox に置いておいて、URLを張る。
+
 これもシンボリックリンクにしたほうがいいのか？
 
 ## VSCode を設定する
@@ -159,5 +166,6 @@ import keypirinha as kp,keypirinha_net as kpn,os;p="PackageControl.keypirinha-pa
 ### Keypirinha Pacage Control で入れたいパッケージ
 
 Install Pacage "Keypirinha-WindwsApps"
+
 microsoft store からインストールしたアプリを keypirinha で参照する。
 
