@@ -52,7 +52,7 @@ chocolatey でソフトをインストール
 必須なソフトたち
 
 ``` shell
-choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar
+choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank
 ```
 
 個人用PCなら必須なソフトたち
