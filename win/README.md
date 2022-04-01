@@ -37,37 +37,40 @@ start ms-settings:hoge
 
 @TODO 多分まだある
 
-## 色々なソフトを chocolatey でインストールする
+## Chocolatey
 
-chocolatey は以下のワンライナーを powershell(root) で実行すれば入る。ワンライナーは下記 URL にもある。
+### Chocolatey のインストール
+
+Chocolatey は以下のワンライナーを powershell(root) で実行すれば入る。ワンライナーは下記 URL にもある。
 https://chocolatey.org/install
 
 ```sh
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 ```
 
+### chocolatey でソフトをインストール
 
-chocolatey でソフトをインストール
+#### 必須なソフトたち
 
-必須なソフトたち
+- win32yank: equalsraf/win32yank A clipboard tool for windows. clip.exe と違ってコマンドラインでクリップボードの読み込みもできる。主に WSL からクリップボードを触るために使用。nvim ならこれ入れるだけで reg: * と連携してくれる(魔法?)。vim が clopboard tool を認識できているかどうかは、checkhealth で。
 
 ``` shell
 choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank
 ```
 
-個人用PCなら必須なソフトたち
+#### 個人用PCなら必須なソフトたち
 
 ``` shell
-choco install -y bitwarden evernote anki mpc-hc
+choco install -y bitwarden evernote anki
 ```
 
-必要に応じて入れれば良いソフトたち
+#### 必要に応じて入れれば良いソフトたち
 
 ``` shell
-choco install -y pandoc xmind steam adb
+choco install -y pandoc xmind steam adb mpc-hc
 ```
 
-WSL Linux コントリビューション
+#### WSL Linux コントリビューション
 
 choco search ubuntu して、新しいの入れる
 
