@@ -3,10 +3,10 @@
 ## OS の設定
 
 以下で設定画面を開ける。
-
-別にあまり楽にならなずしゃらくさい。コマンドで済ませたいが。。。
+別にあまり楽にならなずしゃらくさい。コマンドのみで済ませたいが。。。
 
 URIスキームは、以下のサイトが参考になる。
+
 https://www.atmarkit.co.jp/ait/articles/1707/11/news009_2.html
 
 ```shell
@@ -41,21 +41,18 @@ start ms-settings:hoge
 
 ### Chocolatey のインストール
 
-Chocolatey は以下のワンライナーを powershell(root) で実行すれば入る。ワンライナーは下記 URL にもある。
-https://chocolatey.org/install
+下記 URL からインストールのためのワンライナーをコピペし、powershell(root) で実行する。
 
-```sh
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-```
+https://chocolatey.org/install
 
 ### chocolatey でソフトをインストール
 
 #### 必須なソフトたち
 
-- win32yank: equalsraf/win32yank A clipboard tool for windows. clip.exe と違ってコマンドラインでクリップボードの読み込みもできる。主に WSL からクリップボードを触るために使用。nvim ならこれ入れるだけで reg: * と連携してくれる(魔法?)。vim が clopboard tool を認識できているかどうかは、checkhealth で。
+- win32yank: equalsraf/win32yank A clipboard tool for windows. clip.exe と違ってコマンドラインでクリップボードの読み込みもできる。主に WSL からクリップボードを触るために使用。nvim ならこれ入れるだけで reg: * と連携してくれる(魔法?)。vim が clopboard tool を認識できているかどうかは、checkhealth で確認可能。
 
 ``` shell
-choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank
+choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank phraseexpress
 ```
 
 #### 個人用PCなら必須なソフトたち
@@ -67,7 +64,7 @@ choco install -y bitwarden evernote anki
 #### 必要に応じて入れれば良いソフトたち
 
 ``` shell
-choco install -y pandoc xmind steam adb mpc-hc
+choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm
 ```
 
 #### WSL Linux コントリビューション
@@ -128,7 +125,6 @@ mountFsTab = true
 
 - Setting sync のインストール
 - Setting sync する
-- wsl は？ @TODO
 
 ## AutoHotKey script
 
