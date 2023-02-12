@@ -8,6 +8,9 @@ bash setup.sh
 rm setup.sh
 ```
 
+WSL で "Could not resolve host" のエラーが出る場合は https://github.com/microsoft/WSL/issues/4285
+
+
 上のコマンドを実行すると、以下ができる。
 
 - アプリのインストール
