@@ -86,6 +86,11 @@ options = "metadata,umask=22,fmask=11"
 mountFsTab = true
 ```
 
+### パッケージのダウンロードとWSLバージョン変更
+
+https://learn.microsoft.com/ja-jp/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
+
+
 ### linux に入る
 
 - ubuntu アプリを起動
