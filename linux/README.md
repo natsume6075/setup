@@ -51,3 +51,11 @@ github で登録
 
 - Settings > SSH and GPG keys > New SSH key
 
+
+### shell theme
+
+```bash
+omf install pure
+omf theme pure
+```
+
