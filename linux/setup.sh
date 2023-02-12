@@ -1,5 +1,5 @@
 #!/bin/bash
-AppsToInstall="fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox python3-pip default-jra graphviz"
+AppsToInstall="fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox python3-pip graphviz"
 AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
