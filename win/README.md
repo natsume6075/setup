@@ -64,7 +64,7 @@ choco install -y bitwarden evernote anki dropbox
 #### 必要に応じて入れれば良いソフトたち
 
 ``` shell
-choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm line
+choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm line virtualbox
 ```
 
 #### WSL Linux コントリビューション
