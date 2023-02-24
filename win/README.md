@@ -2,7 +2,7 @@
 
 ## OS の設定
 
-以下で設定画面を開ける。
+以下をエクスプローラに入力すると設定画面を開ける。
 別にあまり楽にならなずしゃらくさい。コマンドのみで済ませたいが。。。
 
 URIスキームは、以下のサイトが参考になる。
@@ -34,6 +34,8 @@ start ms-settings:hoge
   - Additional mouse options > ダブルクリック早く、
 - start ms-settings:personalization-background
   - 壁紙を変更する
+- ms-settings:easeofaccess-display
+  - アニメーションをOFFにする。
 
 @TODO 多分まだある
 
