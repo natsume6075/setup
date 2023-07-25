@@ -175,3 +175,9 @@ Install Pacage "Keypirinha-WindwsApps"
 
 microsoft store からインストールしたアプリを keypirinha で参照する。
 
+## Android Studio
+
+File > Manage IDE Settings > Settings Repository...
+
+https://github.com/natsume6075/AndroidStudio_settings
+
