@@ -75,7 +75,7 @@ choco search ubuntu して、新しいの入れる
 
 ## Chocolatey で入らないソフトたち
 
-- SylphyHorn
+- SylphyHorn: 仮想デスクトップの使い勝手向上。目的は、アニメーション無しでの切り替え・仮想デスクトップ間のウィンドウ移動。
 
 ## WSL 設定
 
