@@ -30,14 +30,22 @@ function PrepareLibWithoutDropbox() {
         LIB_DIRECTORY="./lib"
         mkdir lib
 
-        # Download all libraries included in AppsToSetup from my repositories.
-        for app in "${AppsToSetup[@]}"
-        do
-            curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
-            mkdir $LIB_DIRECTORY/$app
-            tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
-            rm $app.tar.gz
-        done
+	if GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY GIT CLONE." ; then
+            for app in "${AppsToSetup[@]}"
+            do
+		echo "clone $app"
+		git clone git@github.com:natsume6075/$app.git $LIB_DIRECTORY/$app
+            done
+	elif GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY CURL." ; then
+            for app in "${AppsToSetup[@]}"
+            do
+                curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
+                mkdir $LIB_DIRECTORY/$app
+                tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
+                rm $app.tar.gz
+            done
+	fi
+
     else
         echo "Abort setup."
         exit 0
