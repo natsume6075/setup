@@ -1,5 +1,5 @@
 #!/bin/bash
-AppsToInstall="fish zsh neovim tmux tree xdg-utils zip nautilus-dropbox python3-pip graphviz"
+AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip graphviz"
 AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
@@ -19,6 +19,7 @@ function PrepareLibWithDropbox() {
         LIB_DIRECTORY="${HOME}/Dropbox/lib"
     else
         echo "まだ ~/Dropbox/lib が存在しません。以下を実行して同期を待った後、再実行してください。"
+	echo "apt install -y nautilus-dropbox"
         echo "dropbox start -i"
         exit 0
     fi
