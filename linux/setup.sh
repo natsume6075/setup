@@ -1,5 +1,5 @@
 #!/bin/bash
-AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip graphviz"
+AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
 AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
