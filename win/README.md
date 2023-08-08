@@ -79,23 +79,9 @@ choco search ubuntu して、新しいの入れる
 
 ## WSL 設定
 
-### c 直下のアクセス権限を変える (なんのためだっけ？)
+### WSL install
 
-/etc/wsl.confを以下のように編集
-https://qiita.com/cabbage_lettuce/items/acecfaf270b564d8c5aa
-
-``` /etc/wsl.conf
-[automount]
-enabled = true
-root = /mnt/
-options = "metadata,umask=22,fmask=11"
-mountFsTab = true
-```
-
-### パッケージのダウンロードとWSLバージョン変更
-
-https://learn.microsoft.com/ja-jp/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
-
+https://aka.ms/wslinstall
 
 ### linux に入る
 
