@@ -24,7 +24,7 @@ WSL で "Could not resolve host" のエラーが出る場合は https://github.c
             - シンボリックリンクのディレクトリ名
     - lib/ の準備
         - Dropbox を使うなら、Dropbox をセットアップする。
-        - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。
+        - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。(git clone / curl)
     - lib/ 中の各 setup.sh を実行
 
 ## そのた自動化していないこと
