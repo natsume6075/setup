@@ -6,9 +6,9 @@ function GetConfirmation() {
     echo -e "$1 (y/n)"
     read input
     if [ "$input" = 'y' ] ; then
-        return 1
-    elif [ "$input" = 'n' ] ; then
         return 0
+    elif [ "$input" = 'n' ] ; then
+        return 1
     else
         GetConfirmation "$1"
     fi
@@ -27,25 +27,26 @@ function PrepareLibWithDropbox() {
 
 function PrepareLibWithoutDropbox() {
     if GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？" ; then
+        LIB_DIRECTORY="./lib"
+        mkdir lib
+
+        # Download all libraries included in AppsToSetup from my repositories.
+        for app in "${AppsToSetup[@]}"
+        do
+            curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
+            mkdir $LIB_DIRECTORY/$app
+            tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
+            rm $app.tar.gz
+        done
+    else
         echo "Abort setup."
         exit 0
     fi
-    LIB_DIRECTORY="./lib"
-    mkdir lib
-
-    # Download all libraries included in AppsToSetup from my repositories.
-    for app in "${AppsToSetup[@]}"
-    do
-        curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
-        mkdir $LIB_DIRECTORY/$app
-        tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
-        rm $app.tar.gz
-    done
 }
 
 
 # If necessary, install apps by apt.
-if ! GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
+if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
 
     # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
     sudo add-apt-repository ppa:neovim-ppa/unstable
@@ -55,7 +56,7 @@ if ! GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n
 fi
 
 # Download the library via Dropbox or curl, then set LIB_DIRECTORY.
-if ! GetConfirmation "Download the library for setup. Use Dropbox?" ; then
+if GetConfirmation "Download the library for setup. Use Dropbox?" ; then
     PrepareLibWithDropbox
 else
     PrepareLibWithoutDropbox
@@ -65,7 +66,7 @@ fi
 for app in "${AppsToSetup[@]}"
 do
     echo ""
-    if ! GetConfirmation "Set up $app?" ; then
+    if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
         bash $LIB_DIRECTORY/$app/setup.sh
         echo "--- finish setup $app ---"
