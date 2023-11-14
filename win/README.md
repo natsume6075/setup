@@ -54,7 +54,7 @@ https://chocolatey.org/install
 - win32yank: equalsraf/win32yank A clipboard tool for windows. clip.exe と違ってコマンドラインでクリップボードの読み込みもできる。主に WSL からクリップボードを触るために使用。nvim ならこれ入れるだけで reg: * と連携してくれる(魔法?)。vim が clopboard tool を認識できているかどうかは、checkhealth で確認可能。
 
 ``` shell
-choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank beeftext 
+choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank beeftext fonts-ricty-diminished
 ```
 
 #### 個人用PCなら必須なソフトたち
