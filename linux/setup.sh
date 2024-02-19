@@ -1,6 +1,8 @@
 #!/bin/bash
-AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
-AppsToSetup=(dotfiles nvim fish bin)
+AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
+# AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
+AppsToSetup=(dotfiles nvim bin)
+# AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
     echo -e "$1 (y/n)"
