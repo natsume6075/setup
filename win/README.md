@@ -52,9 +52,10 @@ https://chocolatey.org/install
 #### 必須なソフトたち
 
 - win32yank: equalsraf/win32yank A clipboard tool for windows. clip.exe と違ってコマンドラインでクリップボードの読み込みもできる。主に WSL からクリップボードを触るために使用。nvim ならこれ入れるだけで reg: * と連携してくれる(魔法?)。vim が clopboard tool を認識できているかどうかは、checkhealth で確認可能。
+- cica: 等幅フォント
 
 ``` shell
-choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip QTTabBar win32yank beeftext cica
+choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook microsoft-windows-terminal 7zip win32yank beeftext cica
 ```
 
 #### 個人用PCなら必須なソフトたち
@@ -144,10 +145,6 @@ https://github.com/edihbrandon/RictyDiminished
 - ブラウザでインストールする
 - なぜか「データ提供する」を選択しないとアプリ起動しないバグがあるので、提供しないを選択
 
-## QTTabBar
-
-インストール後、エクスプローラーの［表示］リボンから［オプション］の文字部分（上部のアイコンからではなく）をクリックし、［QT タブ バー］を選択したのちWindowsを再起動もしくはWindowsにサインインし直すと、ツールバー上にタブが追加され、開いたフォルダーがタブに追加されるようになる。
-
 ## keypirinha
 
 ### Keypirinha Package Control を入れる
@@ -170,4 +167,5 @@ microsoft store からインストールしたアプリを keypirinha で参照�
 File > Manage IDE Settings > Settings Repository...
 
 https://github.com/natsume6075/AndroidStudio_settings
+
 
