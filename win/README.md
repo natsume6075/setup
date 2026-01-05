@@ -121,20 +121,11 @@ https://aka.ms/wslinstall
 
 ### VSCode で Setting sync を設定
 
-- Setting sync のインストール
-- Setting sync する
+- Setting sync (VSCode のネイティブ設定) を設定する。
 
 ## AutoHotKey script
 
 https://github.com/natsume6075/AutoHotKey-scripts
-
-## font をインストール
-
-https://github.com/edihbrandon/RictyDiminished
-
-- RictyDiminished-Regular
-- RictyDiminished Regular for Powerline
-
 
 ## vivaldi
 
@@ -167,5 +158,6 @@ microsoft store からインストールしたアプリを keypirinha で参照�
 File > Manage IDE Settings > Settings Repository...
 
 https://github.com/natsume6075/AndroidStudio_settings
+
 
 
