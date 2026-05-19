@@ -59,7 +59,7 @@ function PrepareLibWithoutDropbox() {
 if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
 
     # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
-    sudo add-apt-repository ppa:neovim-ppa/unstable
+    sudo -E add-apt-repository ppa:neovim-ppa/unstable
 
     sudo apt update
     sudo apt install -y $AppsToInstall
