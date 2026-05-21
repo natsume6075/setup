@@ -10,6 +10,8 @@ rm setup.sh
 
 WSL で "Could not resolve host" のエラーが出る場合は https://github.com/microsoft/WSL/issues/4285
 
+社内プロキシ環境下では、初回実行時にプロキシ URL の入力を求められる。入力すると `~/.proxy_env` が生成され、apt・git・curl のネットワーク設定が自動で行われる。
+
 
 上のコマンドを実行すると、以下ができる。
 
