@@ -16,7 +16,9 @@ function GetConfirmation() {
     fi
 }
 
+# ネットワーク設定を行う。初回のみ対話入力で ~/.proxy_env を生成し、以降はそれを読む。
 function Bootstrap() {
+    # 初回のみ入力を求めて ~/.proxy_env を生成（proxy IP 等はローカルに留め repo に含めない）
     if [ ! -f ~/.proxy_env ]; then
         read -p "Corporate proxy URL (e.g. http://172.x.x.x:8080): " _p
         read -p "Corporate DNS servers, space-separated (e.g. 10.x.x.x 10.x.x.x, blank to skip): " _dns
@@ -40,12 +42,18 @@ ENVEOF
         sed -i "s|DOMAINS_PLACEHOLDER|$_domains|" ~/.proxy_env
     fi
 
+    # proxy 設定を現セッションに適用（以降の git clone / curl / apt が proxy 経由になる）
     . ~/.proxy_env
 
+    # git@github.com: を https://github.com/ に読み替え（dotfiles clone 前から必要）
+    git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+    # apt 用 proxy 設定（apt は env var を参照しないため専用ファイルが必要）
     printf "Acquire::http::Proxy \"$http_proxy\";\nAcquire::https::Proxy \"$http_proxy\";\n" \
         > /tmp/99proxy.conf
     sudo cp /tmp/99proxy.conf /etc/apt/apt.conf.d/99proxy.conf
 
+    # DNS 設定（CORP_DNS が指定された場合のみ）
     if [ -n "$CORP_DNS" ]; then
         sudo mkdir -p /etc/systemd/resolved.conf.d
         printf "[Resolve]\nDNS=$CORP_DNS\n${CORP_DOMAINS:+Domains=$CORP_DOMAINS\n}DNSSEC=no\n" \
