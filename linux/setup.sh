@@ -108,7 +108,10 @@ Bootstrap
 if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
 
     # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
-    sudo -E add-apt-repository ppa:neovim-ppa/unstable
+    # sudo-rs (Ubuntu 26.04) does not support -E; pass only the network settings needed by add-apt-repository.
+    sudo env http_proxy="${http_proxy:-}" https_proxy="${https_proxy:-}" \
+        HTTP_PROXY="${HTTP_PROXY:-}" HTTPS_PROXY="${HTTPS_PROXY:-}" \
+        no_proxy="${no_proxy:-}" add-apt-repository ppa:neovim-ppa/unstable
 
     sudo apt update
     sudo apt install -y $AppsToInstall
