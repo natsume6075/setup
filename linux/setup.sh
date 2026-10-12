@@ -2,7 +2,22 @@
 AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
 # AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
 AppsToSetup=(dotfiles nvim bin agent-workspace)
+ReposToFetch=(setup "${AppsToSetup[@]}")
 # AppsToSetup=(dotfiles nvim fish bin)
+
+# A standalone downloaded setup.sh uses the caller's directory; a managed
+# lib/setup/linux/setup.sh always uses its own lib, regardless of the caller's cwd.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+if [ "$(basename -- "$SCRIPT_DIR")" = linux ] &&
+   [ "$(basename -- "$(dirname -- "$SCRIPT_DIR")")" = setup ] &&
+   [ "$(basename -- "$(dirname -- "$(dirname -- "$SCRIPT_DIR")")")" = lib ] &&
+   [ -f "$SCRIPT_DIR/../win/README.md" ]; then
+    LIB_DIRECTORY="$(cd -- "$SCRIPT_DIR/../.." && pwd -P)"
+    MANAGED_SETUP=true
+else
+    LIB_DIRECTORY="$PWD/lib"
+    MANAGED_SETUP=false
+fi
 
 function GetConfirmation() {
     echo -e "$1 (y/n)"
@@ -64,41 +79,72 @@ ENVEOF
 }
 
 function PrepareLibWithDropbox() {
-    if [ -d ${HOME}/Dropbox/lib ] ; then
+    if [ -d "${HOME}/Dropbox/lib" ] ; then
         LIB_DIRECTORY="${HOME}/Dropbox/lib"
     else
-        echo "まだ ~/Dropbox/lib が存在しません。以下を実行して同期を待った後、再実行してください。"
-	echo "apt install -y nautilus-dropbox"
-        echo "dropbox start -i"
-        exit 0
+        echo "まだ ~/Dropbox/lib が存在しません。同期後に再実行してください。"
+        return 1
     fi
+    PrepareRepos
+}
+
+# Download only missing repositories. Existing trees (including local changes)
+# are never overwritten or implicitly updated on subsequent runs.
+function PrepareRepos() {
+    mkdir -p -- "$LIB_DIRECTORY" || return 1
+
+    local app path mode archive
+    local missing=()
+    for app in "${ReposToFetch[@]}"; do
+        path="$LIB_DIRECTORY/$app"
+        if [ -e "$path" ] || [ -L "$path" ]; then
+            if [ ! -d "$path" ]; then
+                echo "Repository path exists but is not a directory: $path" >&2
+                return 1
+            fi
+            echo "Keep existing repository: $path"
+        else
+            missing+=("$app")
+        fi
+    done
+
+    if [ "${#missing[@]}" -eq 0 ]; then
+        echo "All repositories already exist in $LIB_DIRECTORY"
+        return 0
+    fi
+
+    if GetConfirmation "Download missing repositories BY GIT CLONE?" ; then
+        mode=git
+    elif GetConfirmation "Download missing repositories BY CURL?" ; then
+        mode=curl
+    else
+        echo "Repository download cancelled." >&2
+        return 1
+    fi
+
+    for app in "${missing[@]}"; do
+        path="$LIB_DIRECTORY/$app"
+        if [ "$mode" = git ]; then
+            git clone "https://github.com/natsume6075/$app.git" "$path" || return 1
+        else
+            archive="$(mktemp)" || return 1
+            if ! curl -fsSL -o "$archive" "https://api.github.com/repos/natsume6075/$app/tarball"; then
+                rm -f -- "$archive"
+                return 1
+            fi
+            mkdir -p -- "$path" || { rm -f -- "$archive"; return 1; }
+            if ! tar -xzf "$archive" --strip-components=1 -C "$path"; then
+                rm -f -- "$archive"
+                echo "Extraction failed for $app; check incomplete directory: $path" >&2
+                return 1
+            fi
+            rm -f -- "$archive"
+        fi
+    done
 }
 
 function PrepareLibWithoutDropbox() {
-    if GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？" ; then
-        LIB_DIRECTORY="./lib"
-        mkdir lib
-
-	if GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY GIT CLONE." ; then
-            for app in "${AppsToSetup[@]}"
-            do
-		echo "clone $app"
-		git clone git@github.com:natsume6075/$app.git $LIB_DIRECTORY/$app
-            done
-	elif GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY CURL." ; then
-            for app in "${AppsToSetup[@]}"
-            do
-                curl -fsSLo $app.tar.gz https://api.github.com/repos/natsume6075/$app/tarball
-                mkdir $LIB_DIRECTORY/$app
-                tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
-                rm $app.tar.gz
-            done
-	fi
-
-    else
-        echo "Abort setup."
-        exit 0
-    fi
+    PrepareRepos
 }
 
 
@@ -117,20 +163,26 @@ if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" 
     sudo apt install -y $AppsToInstall
 fi
 
-# Download the library via Dropbox or curl, then set LIB_DIRECTORY.
-if GetConfirmation "Download the library for setup. Use Dropbox?" ; then
-    PrepareLibWithDropbox
+# Managed reruns always use their existing lib; standalone runs may use Dropbox.
+if [ "$MANAGED_SETUP" = true ]; then
+    PrepareRepos || exit 1
+elif GetConfirmation "Download the library for setup. Use Dropbox?" ; then
+    PrepareLibWithDropbox || exit 1
 else
-    PrepareLibWithoutDropbox
+    PrepareLibWithoutDropbox || exit 1
 fi
 
-# Traverse all setup.sh.
+# Traverse all application setup.sh files; setup itself is only fetched.
 for app in "${AppsToSetup[@]}"
 do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
-        bash $LIB_DIRECTORY/$app/setup.sh
+        if [ ! -f "$LIB_DIRECTORY/$app/setup.sh" ]; then
+            echo "Missing setup script: $LIB_DIRECTORY/$app/setup.sh" >&2
+            exit 1
+        fi
+        bash "$LIB_DIRECTORY/$app/setup.sh" || exit 1
         echo "--- finish setup $app ---"
     fi
 done
