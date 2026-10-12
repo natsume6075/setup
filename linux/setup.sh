@@ -41,11 +41,12 @@ LogFailure() {
 
 # Preserve live command output while retaining output only if a step fails.
 RunStep() {
-    local label="$1" capture fifo tee_pid status
+    local label="$1" capture fifo workdir tee_pid status
     shift
-    capture="$(mktemp)" || return 1
-    fifo="$(mktemp -u)" || { rm -f "$capture"; return 1; }
-    mkfifo -- "$fifo" || { rm -f "$capture"; return 1; }
+    workdir="$(mktemp -d)" || return 1
+    capture="$workdir/output"
+    fifo="$workdir/pipe"
+    if ! mkfifo -- "$fifo"; then rmdir "$workdir"; return 1; fi
     tee "$capture" < "$fifo" &
     tee_pid=$!
     # Do not pipe the command itself: functions such as Bootstrap and
@@ -53,11 +54,10 @@ RunStep() {
     "$@" > "$fifo" 2>&1
     status=$?
     wait "$tee_pid" || status=1
-    rm -f -- "$fifo"
     if [ "$status" -ne 0 ]; then
         LogFailure "$label" "exit code: $status" "$capture"
     fi
-    rm -f -- "$capture"
+    rm -rf -- "$workdir"
     return "$status"
 }
 
