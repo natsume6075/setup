@@ -74,21 +74,26 @@ choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm 
 
 - SylphyHorn: 仮想デスクトップの使い勝手向上。目的は、アニメーション無しでの切り替え・仮想デスクトップ間のウィンドウ移動。
 
-## WSL2 — Ubuntu 24.04 LTS
+## WSL 3.0系 / Ubuntu 26.04 LTS
 
-Windows PowerShellから操作する。WSLの更新・Ubuntuの新規導入・旧ディストリビューションの削除は、次の順に行う。
+Windows PowerShellから操作する。WSL本体は最新の**正式版（3.0系）**に更新し、Ubuntu 26.04 LTSを新規導入する。実行方式は従来どおり**WSL2**であり、`wsl --list --verbose` の `VERSION=2` は正常。
 
-### 1. WSLを更新し、Ubuntu 24.04を導入する
+WSLの更新・Ubuntuの新規導入・旧ディストリビューションの削除は、次の順に行う。
+
+### 1. WSLを更新し、Ubuntu 26.04を導入する
 
 ```powershell
 wsl --update
+wsl --version
 wsl --list --online
-wsl --install -d Ubuntu-24.04
+wsl --install -d Ubuntu-26.04
 wsl --list --verbose
-wsl -d Ubuntu-24.04
+wsl -d Ubuntu-26.04
 ```
 
-Ubuntu初回起動時にLinuxユーザー名とパスワードを設定する。Ubuntuのターミナルで以下を実行し、24.04の起動とネットワークを確認する。
+Ubuntu初回起動時にLinuxユーザー名とパスワードを設定する。PowerShellの `wsl --version` でWSL本体のバージョンを確認する（`wsl --list --verbose` のVERSIONは実行方式の1/2を示す）。更新しても3.0系にならない場合は、OS・WSLの対応状況を先に確認し、プレリリースを無理に導入しない。
+
+Ubuntuのターミナルで以下を実行し、26.04の起動とネットワークを確認する。
 
 ```bash
 cat /etc/os-release
@@ -96,10 +101,10 @@ getent hosts archive.ubuntu.com
 sudo apt update
 ```
 
-問題なければPowerShellへ戻り、Ubuntu 24.04を既定のディストリビューションにする。
+問題なければPowerShellへ戻り、Ubuntu 26.04を既定のディストリビューションにする。
 
 ```powershell
-wsl --set-default Ubuntu-24.04
+wsl --set-default Ubuntu-26.04
 wsl --list --verbose
 ```
 
@@ -118,6 +123,8 @@ dnsTunneling=true
 
 変更したらPowerShellで `wsl --shutdown` を実行し、Ubuntuを再起動して名前解決・aptを再検証する。DNS解決、HTTPプロキシ、証明書の問題は分けて切り分ける。
 
+- [Ubuntu 26.04 LTSのWSL導入 — Canonical](https://ubuntu.com/wsl/docs/latest/howto/install-ubuntu-wsl2/)
+- [WSL 3.0.1リリース — Microsoft](https://github.com/microsoft/WSL/releases/tag/3.0.1)
 - [WSLインストール — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/install)
 - [WSL DNS・ネットワーク — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/networking)
 - [WSL .wslconfig — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/wsl-config)
@@ -147,15 +154,15 @@ wsl --unregister Ubuntu-20.04
 wsl --list --verbose
 ```
 
-上の3箇所の `Ubuntu-20.04` は、すべて実際の旧ディストリビューション名に置き換える。**`Ubuntu-24.04` を指定しないこと。**
+上の3箇所の `Ubuntu-20.04` は、すべて実際の旧ディストリビューション名に置き換える。**`Ubuntu-26.04` を指定しないこと。**
 
 - [WSLのエクスポート・登録解除 — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/basic-commands)
 
 ### 4. Linux環境とCodexをセットアップする
 
-[linux/README.md](../linux/README.md) にある共通の `setup.sh` をUbuntu 24.04で実行し、`AppsToSetup` の `agent-workspace` を選択する。Codex固有の導入は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) に集約している。
+[linux/README.md](../linux/README.md) にある共通の `setup.sh` をUbuntu 26.04で実行し、`AppsToSetup` の `agent-workspace` を選択する。Codex固有の導入は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) に集約している。
 
-PR検証中は `setup` の `feat/add-agent-harness` を取得して実行する。Linuxセットアップの動作検証後、[PR #2](https://github.com/natsume6075/setup/pull/2) をレビュー・マージする。ログイン後の作業と残タスクは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
+Ubuntu 26.04では従来のアプリ（neovim PPA、Python等）の互換性に差が出る可能性があるため、各アプリのインストール結果を確認する。PR検証中は `setup` の `feat/add-agent-harness` を取得して実行する。Linuxセットアップの動作検証後、[PR #2](https://github.com/natsume6075/setup/pull/2) をレビュー・マージする。ログイン後の作業と残タスクは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
 
 ### 5. KoofrとiPhone Obsidian
 
