@@ -8,7 +8,7 @@ bash setup.sh
 rm setup.sh
 ```
 
-WSL で "Could not resolve host" のエラーが出る場合は https://github.com/microsoft/WSL/issues/4285
+WSL でDNSエラーが出る場合は、まず [Windows側のWSL/DNS手順](../win/README.md) を参照。古い固定DNSの変更を行う前にWSL更新とDNS tunnelingを確認する。
 
 社内プロキシ環境下では、初回実行時にプロキシ URL の入力を求められる。入力すると `~/.proxy_env` が生成され、apt・git・curl のネットワーク設定が自動で行われる。
 
@@ -85,10 +85,10 @@ codex
 
 - Node.js LTS がなければ nvm経由で導入し、Codex CLI をインストールする。
 - `natsume6075/agent-workspace` をクローンし、未作成なら共通指示と引き継ぎ資料をコピーする。
-- 初回にagent-workspaceが空リポジトリの場合は、生成された `AGENTS.md` と `docs/HANDOFF.md` を確認したうえで初期コミットしてpushする。
-- Windows側で [Koofr Desktop](https://koofr.eu/) をセットアップする。Linux作業ツリーをクラウド同期フォルダへ移動しない。
-- iPhoneのObsidian同期は Koofr Sync を個別にセットアップし、往復編集テストを行う。
+- clone先は [agent-workspace](https://github.com/natsume6075/agent-workspace) を正本とする。`README.md`・`AGENTS.md`・`.agents/docs/TASKS.md`・`.agents/docs/HANDOFF.md`・`.codex/config.toml` をGit管理済み。自動セットアップはこれらを上書きしない。
+- Windows側で [Koofr Desktop](https://koofr.eu/) をセットアップする。Linux作業ツリーをクラウド同期フォルダへ移動しない。インストールやiPhone操作は [Windows・端末手順](../win/README.md) を参照。
+- iPhoneのObsidian同期には [Koofr Sync](https://community.obsidian.md/plugins/koofr-sync) を使用し、PCとの往復編集テストを行う（認証や実機検証は人間の作業）。
 - [Codex CLI](https://github.com/openai/codex) / [nvm](https://github.com/nvm-sh/nvm)
 
-`feat/add-agent-harness` マージ後はダウンロードURLのブランチを `master` に変更する。
+`feat/add-agent-harness` の検証・Draft PRレビューを経てマージする際、ダウンロードURLのブランチを `master` に更新する。以後のタスク管理・Codexへの引き継ぎの正本は [agent-workspace/.agents/docs/](https://github.com/natsume6075/agent-workspace/tree/main/.agents/docs) にある。
 
