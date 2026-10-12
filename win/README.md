@@ -124,6 +124,32 @@ Gitの作業ツリーはWSL側に置き、KoofrはObsidian Vault・成果物を�
 
 Ubuntu-24.04で [linux/README.md](../linux/README.md) の agent harness セクションに従う。
 
+#### iPhoneのObsidianとKoofr Sync
+
+iPhoneの標準「ファイル」アプリからKoofrのフォルダをそのままObsidian Vaultとして開くことはできない。Obsidian内のローカルVaultをKoofr Syncプラグインでクラウドと同期する。
+
+1. [Koofr](https://koofr.eu/) のWeb設定から**アプリ専用パスワード**を作成する（通常パスワードや秘密情報をリポジトリに保存しない）。
+2. iPhoneのObsidianでローカルVaultを作り、設定 → Community Plugins → Browse から [Koofr Sync](https://community.obsidian.md/plugins/koofr-sync) をインストール・有効化。
+3. Koofr Sync設定にメールアドレス・アプリ専用パスワードを入力し、PCで同期しているVaultの**同じクラウドフォルダ**を指定。
+4. 自動同期と競合処理を確認し、**PCでテストノート作成 → iPhoneに反映 → iPhoneで編集 → PCに反映** の往復テストを行う。
+5. 同期はバックアップではない。誤削除・競合に備え、別媒体で履歴バックアップを用意し、復元も検証する。
+
+- [Koofr Sync公式実装とセットアップ](https://github.com/bartekmp/koofr-obsidian-sync)
+- [Koofr Sync — Obsidianプラグイン](https://community.obsidian.md/plugins/koofr-sync)
+
+#### この環境に関する人力操作と検証
+
+以下はOSやアプリのログイン・実機テストが必要で、自動セットアップでは実行しない。
+
+- Windowsから新しいUbuntu 24.04を起動・初期ユーザー作成し、旧20.04を温存。
+- 新UbuntuでDNS/Proxyを確認して [Linux用のCodexセットアップ](../linux/README.md) を実施。
+- CodexのChatGPT認証（`codex login`）とワークスペース内での初回起動。
+- Koofr Desktop導入・ログイン・同期先選択、iPhoneでのKoofr Sync有効化と往復テスト。
+- 外部サービス接続（Google / Slack / LINE / GitHub）のOAuthや権限承認、Remote Controlの実機検証。
+- 検証後に [setup Draft PR #2](https://github.com/natsume6075/setup/pull/2) をレビューし、問題がなければ `master` へマージ。
+
+作業の状態・Codexへの恒久的な引き継ぎは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
+
 ## Windows-Termianl 設定
 
 @TODO
