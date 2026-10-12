@@ -29,6 +29,38 @@ WSL でDNSエラーが出る場合は、まず [Windows側のWSL/DNS手順](../w
         - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。(git clone / curl)
     - lib/ 中の各 setup.sh を実行
 
+## 再実行
+
+初回にDropboxを使わない場合、ダウンロードした `setup.sh` を起動したディレクトリの直下に `lib/` を作成する。Dropboxを選んだ場合は `~/Dropbox/lib` を利用する。どちらの場合も `lib/` に `setup/` 自身を取得する。次回からは `lib/setup/linux/setup.sh` を実行すれば、実行時のカレントディレクトリに関係なく同じ `lib/` を利用する。
+
+```bash
+bash /work/lib/setup/linux/setup.sh  # /work/lib は実際の配置先に置き換える
+```
+
+既存リポジトリは自動で上書き・更新せず、不足しているものだけ取得する。Git管理の場合、更新は必要に応じて明示的に行う。
+
+## セットアップ後の確認
+
+```bash
+# OS・パッケージ・ネットワーク
+cat /etc/os-release
+sudo apt update
+nvim --version
+tmux -V
+zsh --version
+
+# Codex (agent-workspace/setup.sh を実行した場合)
+source ~/.nvm/nvm.sh
+node --version
+npm --version
+codex --version
+
+# agent-workspace のリンク（セットアップ時の既定位置を選んだ場合）
+readlink -f ~/agent-workspace
+```
+
+出力が実際の `agent-workspace` リポジトリを指していることを確認する。リンクの場所をカスタマイズした場合は読み替える。
+
 ## そのた自動化していないこと
 
 ### デフォルトシェルの設定
