@@ -87,7 +87,7 @@ function PrepareLibWithDropbox() {
 
 # Keep existing repositories untouched and obtain missing ones only.
 function FetchMissingRepos() {
-    local app archive
+    local app archive staging
     mkdir -p "$LIB_DIRECTORY" || return 1
     local missing=()
     for app in "${ReposToFetch[@]}"; do
@@ -117,12 +117,18 @@ function FetchMissingRepos() {
                 rm -f "$archive"
                 return 1
             fi
-            mkdir -p "$LIB_DIRECTORY/$app" || return 1
-            if ! tar -zxf "$archive" --strip-components 1 -C "$LIB_DIRECTORY/$app"; then
+            # Only publish a repository after extraction succeeds.
+            staging="$(mktemp -d "$LIB_DIRECTORY/.${app}.tmp.XXXXXX")" || { rm -f "$archive"; return 1; }
+            if ! tar -zxf "$archive" --strip-components 1 -C "$staging"; then
                 rm -f "$archive"
+                rm -rf -- "$staging"
                 return 1
             fi
             rm -f "$archive"
+            if ! mv -T -- "$staging" "$LIB_DIRECTORY/$app"; then
+                rm -rf -- "$staging"
+                return 1
+            fi
         done
     else
         echo "Repository download cancelled." >&2
