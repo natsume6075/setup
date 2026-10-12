@@ -61,7 +61,7 @@ choco install -y keypirinha vivaldi autohotkey googleJapaneseInput quicklook mic
 #### 個人用PCなら必須なソフトたち
 
 ``` shell
-choco install -y bitwarden evernote anki dropbox
+choco install -y bitwarden evernote anki dropbox chatgpt
 ```
 
 #### 必要に応じて入れれば良いソフトたち
