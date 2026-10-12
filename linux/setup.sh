@@ -1,7 +1,7 @@
 #!/bin/bash
 AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
 # AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
-AppsToSetup=(dotfiles nvim bin)
+AppsToSetup=(dotfiles nvim bin agent-workspace)
 # AppsToSetup=(dotfiles nvim fish bin)
 
 function GetConfirmation() {
@@ -88,7 +88,9 @@ function PrepareLibWithoutDropbox() {
 	elif GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY CURL." ; then
             for app in "${AppsToSetup[@]}"
             do
-                curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/master
+                branch=master
+                if [ "$app" = "agent-workspace" ]; then branch=main; fi
+                curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/$branch
                 mkdir $LIB_DIRECTORY/$app
                 tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
                 rm $app.tar.gz
