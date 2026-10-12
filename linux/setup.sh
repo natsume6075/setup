@@ -179,7 +179,7 @@ do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
-        bash $LIB_DIRECTORY/$app/setup.sh
+        bash "$LIB_DIRECTORY/$app/setup.sh" || { echo "--- FAILED setup $app ---" >&2; exit 1; }
         echo "--- finish setup $app ---"
     fi
 done
