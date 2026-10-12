@@ -2,6 +2,7 @@
 AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
 # AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
 AppsToSetup=(dotfiles nvim bin agent-workspace)
+ReposToFetch=(setup "${AppsToSetup[@]}")
 # AppsToSetup=(dotfiles nvim fish bin)
 
 # A standalone script uses the caller's directory. The managed copy uses its own lib.
@@ -84,32 +85,59 @@ function PrepareLibWithDropbox() {
     fi
 }
 
-function PrepareLibWithoutDropbox() {
-    if GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？" ; then
-        mkdir -p "$LIB_DIRECTORY"
+# Keep existing repositories untouched and obtain missing ones only.
+function FetchMissingRepos() {
+    local app archive
+    mkdir -p "$LIB_DIRECTORY" || return 1
+    local missing=()
+    for app in "${ReposToFetch[@]}"; do
+        if [ -e "$LIB_DIRECTORY/$app" ] || [ -L "$LIB_DIRECTORY/$app" ]; then
+            if [ ! -d "$LIB_DIRECTORY/$app" ]; then
+                echo "Not a directory: $LIB_DIRECTORY/$app" >&2
+                return 1
+            fi
+        else
+            missing+=("$app")
+        fi
+    done
 
-	if GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY GIT CLONE." ; then
-            for app in "${AppsToSetup[@]}"
-            do
-		echo "clone $app"
-		git clone git@github.com:natsume6075/$app.git $LIB_DIRECTORY/$app
-            done
-	elif GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY CURL." ; then
-            for app in "${AppsToSetup[@]}"
-            do
-                curl -fsSLo $app.tar.gz https://api.github.com/repos/natsume6075/$app/tarball
-                mkdir $LIB_DIRECTORY/$app
-                tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
-                rm $app.tar.gz
-            done
-	fi
+    if [ "${#missing[@]}" -eq 0 ]; then
+        echo "All repositories already exist in $LIB_DIRECTORY"
+        return 0
+    fi
 
+    if GetConfirmation "Download missing repositories BY GIT CLONE?" ; then
+        for app in "${missing[@]}"; do
+            git clone "git@github.com:natsume6075/$app.git" "$LIB_DIRECTORY/$app" || return 1
+        done
+    elif GetConfirmation "Download missing repositories BY CURL?" ; then
+        for app in "${missing[@]}"; do
+            archive="$(mktemp)" || return 1
+            if ! curl -fsSLo "$archive" "https://api.github.com/repos/natsume6075/$app/tarball"; then
+                rm -f "$archive"
+                return 1
+            fi
+            mkdir -p "$LIB_DIRECTORY/$app" || return 1
+            if ! tar -zxf "$archive" --strip-components 1 -C "$LIB_DIRECTORY/$app"; then
+                rm -f "$archive"
+                return 1
+            fi
+            rm -f "$archive"
+        done
     else
-        echo "Abort setup."
-        exit 0
+        echo "Repository download cancelled." >&2
+        return 1
     fi
 }
 
+function PrepareLibWithoutDropbox() {
+    if [ "$MANAGED_SETUP" = true ] || GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？"; then
+        FetchMissingRepos
+    else
+        echo "Abort setup."
+        return 1
+    fi
+}
 
 Bootstrap
 
@@ -128,11 +156,12 @@ fi
 
 # Reuse the managed lib on repeat runs; standalone runs can still choose Dropbox.
 if [ "$MANAGED_SETUP" = true ]; then
-    echo "Using existing library: $LIB_DIRECTORY"
+    PrepareLibWithoutDropbox || exit 1
 elif GetConfirmation "Download the library for setup. Use Dropbox?" ; then
     PrepareLibWithDropbox
+    FetchMissingRepos || exit 1
 else
-    PrepareLibWithoutDropbox
+    PrepareLibWithoutDropbox || exit 1
 fi
 
 # Traverse all setup.sh.
