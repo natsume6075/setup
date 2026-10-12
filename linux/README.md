@@ -29,6 +29,45 @@ WSL でDNSエラーが出る場合は、まず [Windows側のWSL/DNS手順](../w
         - そうでないなら ./lib を作成し、各ライブラリをリポジトリからダウンロードし、lib 配下に配置する。(git clone / curl)
     - lib/ 中の各 setup.sh を実行
 
+## 再実行
+
+初回は、上記のコマンドを実行した**カレントディレクトリ直下**に `lib/` を作成する（例: `/work/lib`）。
+`lib/` には `setup/` 自身も取得される。2回目以降はその中のスクリプトから起動する。どのディレクトリから実行しても、スクリプトが存在する `lib/` を使用する。
+
+```bash
+bash /work/lib/setup/linux/setup.sh  # /work/lib は実際の配置先に置き換える
+```
+
+既に存在するリポジトリは自動取得・上書きしない。不足するリポジトリだけ追加する。既存リポジトリの更新は必要に応じてGitで行う。
+
+## セットアップ後の確認
+
+```bash
+# OS・パッケージとネットワーク
+cat /etc/os-release
+sudo apt update
+nvim --version
+tmux -V
+zsh --version
+
+# Codex (agent-workspace/setup.sh を実行した場合)
+source ~/.nvm/nvm.sh
+node --version
+npm --version
+codex --version
+
+# lib の配置とGit管理（Git clone方式の場合）
+LIB_DIRECTORY=/work/lib  # 初回に作成した実際のlibに置き換える
+ls -la "$LIB_DIRECTORY"
+git -C "$LIB_DIRECTORY/setup" status --short --branch
+git -C "$LIB_DIRECTORY/agent-workspace" status --short --branch
+
+# agent-workspace のアクセス用リンク（入力時に既定値を選んだ場合）
+readlink -f ~/agent-workspace
+```
+
+`readlink -f` の出力が `$LIB_DIRECTORY/agent-workspace` と一致することを確認する。リンクの場所を変更した場合は、その指定パスで確認する。curl方式の場合はGit履歴がないため `git status` は対象外。
+
 ## そのた自動化していないこと
 
 ### デフォルトシェルの設定
