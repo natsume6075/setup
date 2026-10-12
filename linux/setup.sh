@@ -16,16 +16,129 @@ else
     MANAGED_SETUP=false
 fi
 
-function GetConfirmation() {
-    echo -e "$1 (y/n)"
-    read input
-    if [ "$input" = 'y' ] ; then
-        return 0
-    elif [ "$input" = 'n' ] ; then
-        return 1
-    else
-        GetConfirmation "$1"
+# Validation and failure logs live next to the invoked setup.sh (even for a
+# standalone first-run copy). Create the directory only when something fails.
+LOG_DIRECTORY="$SCRIPT_DIR/logs"
+LOG_FILE="$LOG_DIRECTORY/setup-$(date +%Y%m%d-%H%M%S)-$$.log"
+HEALTH_FAILURES=0
+
+LogFailure() {
+    local label="$1" details="$2" output_file="${3:-}"
+    mkdir -p -m 700 -- "$LOG_DIRECTORY" || { echo "Cannot create $LOG_DIRECTORY" >&2; return 1; }
+    (
+        umask 077
+        {
+            printf '[%s] FAIL %s\n%s\n' "$(date -Is)" "$label" "$details"
+            if [ -n "$output_file" ] && [ -f "$output_file" ]; then
+                printf '%s\n' '--- output ---'
+                cat -- "$output_file"
+            fi
+            printf '%s\n\n' '--- end ---'
+        } >> "$LOG_FILE"
+    ) || return 1
+    echo "FAIL: $label (details: $LOG_FILE)" >&2
+}
+
+# Preserve live command output while retaining output only if a step fails.
+RunStep() {
+    local label="$1" capture status
+    shift
+    capture="$(mktemp)" || return 1
+    "$@" 2>&1 | tee "$capture"
+    status=${PIPESTATUS[0]}
+    if [ "$status" -ne 0 ]; then
+        LogFailure "$label" "exit code: $status" "$capture"
     fi
+    rm -f -- "$capture"
+    return "$status"
+}
+
+HealthCheck() {
+    local label="$1" output status
+    shift
+    output="$("$@" 2>&1)"
+    status=$?
+    if [ "$status" -eq 0 ]; then
+        printf 'PASS: %s\n' "$label"
+    else
+        HEALTH_FAILURES=$((HEALTH_FAILURES + 1))
+        local capture
+        capture="$(mktemp)" || return 1
+        printf '%s\n' "$output" > "$capture"
+        LogFailure "$label" "health check exit code: $status" "$capture"
+        rm -f -- "$capture"
+    fi
+    return "$status"
+}
+
+AssertLink() {
+    local link="$1" target="$2"
+    [ -L "$link" ] && [ "$(readlink -f -- "$link")" = "$(realpath -e -- "$target")" ]
+}
+
+CheckAptCommands() {
+    # Only called when the user chose to install apt packages.
+    HealthCheck 'apt/zsh' zsh --version || true
+    HealthCheck 'apt/nvim' nvim --version || true
+    HealthCheck 'apt/tmux' tmux -V || true
+    HealthCheck 'apt/tree' tree --version || true
+    HealthCheck 'apt/xdg-open' xdg-open --version || true
+    HealthCheck 'apt/zip' zip -v || true
+    HealthCheck 'apt/pip3' pip3 --version || true
+}
+
+CheckApp() {
+    case "$1" in
+        dotfiles)
+            HealthCheck 'dotfiles/.zshenv' AssertLink "$HOME/.zshenv" "$LIB_DIRECTORY/dotfiles/.zshenv" || true
+            HealthCheck 'dotfiles/zsh' AssertLink "$HOME/.config/zsh" "$LIB_DIRECTORY/dotfiles/zsh" || true
+            ;;
+        nvim)
+            # Dein/pynvim have their own y/n prompt inside nvim/setup.sh.
+            # Do not treat their intentional omission as a failed check here.
+            HealthCheck 'nvim/config' AssertLink "$HOME/.config/nvim" "$LIB_DIRECTORY/nvim" || true
+            ;;
+        bin)
+            HealthCheck 'bin/link' AssertLink "$HOME/bin" "$LIB_DIRECTORY/bin/bin" || true
+            ;;
+        agent-workspace)
+            # The installer checks the user-chosen (possibly nondefault) link.
+            # A subshell must load nvm because child scripts cannot update this
+            # process's PATH. Missing PATH here is NOT proof Codex is missing.
+            HealthCheck 'agent-workspace/codex' bash -c '
+                set -e
+                export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+                test -s "$NVM_DIR/nvm.sh"
+                . "$NVM_DIR/nvm.sh"
+                nvm use --silent default >/dev/null
+                command -v codex
+                codex --version
+                npm list -g --depth=0 @openai/codex
+            ' || true
+            if ! command -v codex >/dev/null 2>&1; then
+                echo 'NOTE: This shell may not have loaded nvm yet. Open a new shell and check codex --version.'
+                echo '      If it is still missing, run: source ~/.nvm/nvm.sh'
+                echo '      Custom zsh ZDOTDIR configurations may need an explicit nvm initialization.'
+            fi
+            ;;
+    esac
+}
+
+
+function GetConfirmation() {
+    local input
+    while true; do
+        echo -e "$1 (y/n)"
+        if ! read -r input; then
+            LogFailure "input" "Unexpected end of input while prompting: $1"
+            exit 1
+        fi
+        case "$input" in
+            y) return 0 ;;
+            n) return 1 ;;
+            *) echo "Please enter y or n." ;;
+        esac
+    done
 }
 
 # ネットワーク設定を行う。初回のみ対話入力で ~/.proxy_env を生成し、以降はそれを読む。
@@ -134,8 +247,8 @@ function FetchMissingRepos() {
             fi
         done
     else
-        echo "Repository download cancelled." >&2
-        return 1
+        echo "SKIP: repository download (user selected n)"
+        return 0
     fi
 }
 
@@ -148,38 +261,48 @@ function PrepareLibWithoutDropbox() {
     fi
 }
 
-Bootstrap
-
-# If necessary, install apps by apt.
-if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
-
-    # apt の stable バージョンでは lua とかはいっていない(required by dein)ので unstable から取ってくる。
-    # sudo-rs (Ubuntu 26.04) does not support -E; pass only the network settings needed by add-apt-repository.
+InstallAptApps() {
+    # Ubuntu 26.04 sudo-rs does not support sudo -E.
     sudo env http_proxy="${http_proxy:-}" https_proxy="${https_proxy:-}" \
         HTTP_PROXY="${HTTP_PROXY:-}" HTTPS_PROXY="${HTTPS_PROXY:-}" \
-        no_proxy="${no_proxy:-}" add-apt-repository ppa:neovim-ppa/unstable
-
-    sudo apt update
+        no_proxy="${no_proxy:-}" add-apt-repository ppa:neovim-ppa/unstable &&
+    sudo apt update &&
     sudo apt install -y $AppsToInstall
+}
+
+RunStep 'network/bootstrap' Bootstrap || exit 1
+
+if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" ; then
+    RunStep 'apt/install' InstallAptApps || exit 1
+    CheckAptCommands
+else
+    echo 'SKIP: apt installation and checks (user selected n)'
 fi
 
-# Reuse the managed lib on repeat runs; standalone runs can still choose Dropbox.
+# Managed reruns reuse their lib. A standalone run may use Dropbox.
 if [ "$MANAGED_SETUP" = true ]; then
-    PrepareLibWithoutDropbox || exit 1
+    RunStep 'repos/prepare' PrepareLibWithoutDropbox || exit 1
 elif GetConfirmation "Download the library for setup. Use Dropbox?" ; then
     PrepareLibWithDropbox
-    FetchMissingRepos || exit 1
+    RunStep 'repos/prepare' FetchMissingRepos || exit 1
 else
-    PrepareLibWithoutDropbox || exit 1
+    RunStep 'repos/prepare' PrepareLibWithoutDropbox || exit 1
 fi
 
-# Traverse all setup.sh.
-for app in "${AppsToSetup[@]}"
-do
+for app in "${AppsToSetup[@]}"; do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
-        bash "$LIB_DIRECTORY/$app/setup.sh" || { echo "--- FAILED setup $app ---" >&2; exit 1; }
+        RunStep "setup/$app" bash "$LIB_DIRECTORY/$app/setup.sh" || exit 1
+        CheckApp "$app"
         echo "--- finish setup $app ---"
+    else
+        echo "SKIP: setup/$app and checks (user selected n)"
     fi
 done
+
+if [ "$HEALTH_FAILURES" -ne 0 ]; then
+    echo "Validation failed: $HEALTH_FAILURES check(s). See $LOG_FILE" >&2
+    exit 1
+fi
+echo "Selected setup tasks and health checks completed."
