@@ -16,6 +16,91 @@ else
     MANAGED_SETUP=false
 fi
 
+# Health checks are independent of the interactive installation flow.
+# Keep diagnostics beside the invoked script; do not write logs for successful checks.
+LOG_DIRECTORY="$SCRIPT_DIR/logs"
+LOG_FILE="$LOG_DIRECTORY/setup-$(date +%Y%m%d-%H%M%S)-$.log"
+HEALTH_FAILURES=0
+
+LogFailure() {
+    local label="$1" details="$2"
+    mkdir -p -m 700 -- "$LOG_DIRECTORY" || return 1
+    ( umask 077
+      printf '[%s] FAIL %s\n%s\n\n' "$(date -Is)" "$label" "$details" >> "$LOG_FILE"
+    )
+    echo "FAIL: $label (details: $LOG_FILE)" >&2
+}
+
+HealthCheck() {
+    local label="$1" output status
+    shift
+    output="$("$@" 2>&1)"
+    status=$?
+    if [ "$status" -eq 0 ]; then
+        echo "PASS: $label"
+    else
+        HEALTH_FAILURES=$((HEALTH_FAILURES + 1))
+        LogFailure "$label" "exit code: $status
+$output"
+    fi
+    return "$status"
+}
+
+VerifyLink() {
+    local link="$1" target="$2" actual expected
+    if [ ! -L "$link" ]; then
+        echo "Not a symlink: $link"
+        return 1
+    fi
+    actual="$(readlink -f -- "$link")" || return 1
+    expected="$(realpath -e -- "$target")" || return 1
+    if [ "$actual" != "$expected" ]; then
+        echo "Expected $link -> $expected, got $actual"
+        return 1
+    fi
+}
+
+CheckAptCommands() {
+    # Only the opt-in apt installation enables these checks.
+    HealthCheck 'apt/zsh' zsh --version || true
+    HealthCheck 'apt/nvim' nvim --version || true
+    HealthCheck 'apt/tmux' tmux -V || true
+    HealthCheck 'apt/tree' tree --version || true
+    HealthCheck 'apt/xdg-open' xdg-open --version || true
+    HealthCheck 'apt/zip' zip -v || true
+    HealthCheck 'apt/pip3' pip3 --version || true
+}
+
+CheckApp() {
+    case "$1" in
+        dotfiles)
+            HealthCheck 'dotfiles/.zshenv' VerifyLink "$HOME/.zshenv" "$LIB_DIRECTORY/dotfiles/.zshenv" || true
+            HealthCheck 'dotfiles/zsh' VerifyLink "$HOME/.config/zsh" "$LIB_DIRECTORY/dotfiles/zsh" || true
+            ;;
+        nvim)
+            # Dein/pynvim have their own y/n choice inside nvim/setup.sh.
+            HealthCheck 'nvim/config' VerifyLink "$HOME/.config/nvim" "$LIB_DIRECTORY/nvim" || true
+            ;;
+        bin)
+            HealthCheck 'bin/link' VerifyLink "$HOME/bin" "$LIB_DIRECTORY/bin/bin" || true
+            ;;
+        agent-workspace)
+            # New shells must load nvm; do not inspect the parent shell's PATH.
+            HealthCheck 'agent-workspace/codex' bash -c '
+                set -e
+                export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+                test -s "$NVM_DIR/nvm.sh"
+                . "$NVM_DIR/nvm.sh"
+                nvm use --silent default >/dev/null
+                command -v codex
+                codex --version
+                npm list -g --depth=0 @openai/codex
+            ' || true
+            echo 'NOTE: Open a new zsh shell to use Codex. If needed: source ~/.nvm/nvm.sh'
+            ;;
+    esac
+}
+
 function GetConfirmation() {
     echo -e "$1 (y/n)"
     read input
@@ -161,6 +246,9 @@ if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" 
 
     sudo apt update
     sudo apt install -y $AppsToInstall
+    CheckAptCommands
+else
+    echo 'SKIP: apt installation and checks (user selected n)'
 fi
 
 # Reuse the managed lib on repeat runs; standalone runs can still choose Dropbox.
@@ -179,7 +267,16 @@ do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
-        bash "$LIB_DIRECTORY/$app/setup.sh" || { echo "--- FAILED setup $app ---" >&2; exit 1; }
+        bash "$LIB_DIRECTORY/$app/setup.sh" || { LogFailure "setup/$app" "Child setup exited nonzero (see terminal output or child logs)."; exit 1; }
+        CheckApp "$app"
         echo "--- finish setup $app ---"
+    else
+        echo "SKIP: setup/$app and checks (user selected n)"
     fi
 done
+
+if [ "$HEALTH_FAILURES" -ne 0 ]; then
+    echo "Validation failed: $HEALTH_FAILURES check(s). See $LOG_FILE" >&2
+    exit 1
+fi
+echo "Selected setup tasks and health checks completed."
