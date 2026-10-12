@@ -2,6 +2,7 @@
 AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
 # AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
 AppsToSetup=(dotfiles nvim bin agent-workspace)
+# Fetch setup itself, but execute setup.sh only for AppsToSetup entries.
 ReposToFetch=(setup "${AppsToSetup[@]}")
 # AppsToSetup=(dotfiles nvim fish bin)
 
@@ -85,7 +86,8 @@ function PrepareLibWithDropbox() {
     fi
 }
 
-# Keep existing repositories untouched and obtain missing ones only.
+# Existing directories belong to the user: never pull, replace, or delete them.
+# Only missing repository paths are fetched; this is not a repository health check.
 function FetchMissingRepos() {
     local app archive staging
     mkdir -p "$LIB_DIRECTORY" || return 1
@@ -117,7 +119,8 @@ function FetchMissingRepos() {
                 rm -f "$archive"
                 return 1
             fi
-            # Only publish a repository after extraction succeeds.
+            # Extract beside the destination, then rename on success so a failed
+            # download never leaves a partial directory that looks installed.
             staging="$(mktemp -d "$LIB_DIRECTORY/.${app}.tmp.XXXXXX")" || { rm -f "$archive"; return 1; }
             if ! tar -zxf "$archive" --strip-components 1 -C "$staging"; then
                 rm -f "$archive"
