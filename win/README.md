@@ -122,7 +122,7 @@ Gitの作業ツリーはWSL側に置き、KoofrはObsidian Vault・成果物を�
 
 ### Codexの導入
 
-Ubuntu-24.04で [linux/README.md](../linux/README.md) の agent harness セクションに従う。
+Ubuntu-24.04で [linux/README.md](../linux/README.md) の共通 `setup.sh` を実行し、`AppsToSetup` の `agent-workspace` を選択する。Codexの導入処理は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) にある。
 
 #### iPhoneのObsidianとKoofr Sync
 
