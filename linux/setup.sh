@@ -88,9 +88,7 @@ function PrepareLibWithoutDropbox() {
 	elif GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY CURL." ; then
             for app in "${AppsToSetup[@]}"
             do
-                branch=master
-                if [ "$app" = "agent-workspace" ]; then branch=main; fi
-                curl -sSLo $app.tar.gz https://github.com/natsume6075/$app/tarball/$branch
+                curl -sSLo $app.tar.gz https://api.github.com/repos/natsume6075/$app/tarball
                 mkdir $LIB_DIRECTORY/$app
                 tar -zxf $app.tar.gz --strip-components 1 -C $LIB_DIRECTORY/$app
                 rm $app.tar.gz
