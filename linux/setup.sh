@@ -41,11 +41,19 @@ LogFailure() {
 
 # Preserve live command output while retaining output only if a step fails.
 RunStep() {
-    local label="$1" capture status
+    local label="$1" capture fifo tee_pid status
     shift
     capture="$(mktemp)" || return 1
-    "$@" 2>&1 | tee "$capture"
-    status=${PIPESTATUS[0]}
+    fifo="$(mktemp -u)" || { rm -f "$capture"; return 1; }
+    mkfifo -- "$fifo" || { rm -f "$capture"; return 1; }
+    tee "$capture" < "$fifo" &
+    tee_pid=$!
+    # Do not pipe the command itself: functions such as Bootstrap and
+    # PrepareLibWithDropbox must update variables in this shell.
+    "$@" > "$fifo" 2>&1
+    status=$?
+    wait "$tee_pid" || status=1
+    rm -f -- "$fifo"
     if [ "$status" -ne 0 ]; then
         LogFailure "$label" "exit code: $status" "$capture"
     fi
@@ -256,8 +264,8 @@ function PrepareLibWithoutDropbox() {
     if [ "$MANAGED_SETUP" = true ] || GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？"; then
         FetchMissingRepos
     else
-        echo "Abort setup."
-        return 1
+        echo "SKIP: lib preparation (user selected n)"
+        return 0
     fi
 }
 
@@ -293,6 +301,10 @@ for app in "${AppsToSetup[@]}"; do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
+        if [ ! -f "$LIB_DIRECTORY/$app/setup.sh" ]; then
+            echo "SKIP: setup/$app (repository not available)"
+            continue
+        fi
         RunStep "setup/$app" bash "$LIB_DIRECTORY/$app/setup.sh" || exit 1
         CheckApp "$app"
         echo "--- finish setup $app ---"
