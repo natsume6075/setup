@@ -4,6 +4,16 @@ AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
 AppsToSetup=(dotfiles nvim bin agent-workspace)
 # AppsToSetup=(dotfiles nvim fish bin)
 
+# A standalone script uses the caller's directory. The managed copy uses its own lib.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+if [[ "$SCRIPT_DIR" == */lib/setup/linux ]] && [ -f "$SCRIPT_DIR/../win/README.md" ]; then
+    LIB_DIRECTORY="$(cd -- "$SCRIPT_DIR/../.." && pwd -P)"
+    MANAGED_SETUP=true
+else
+    LIB_DIRECTORY="$PWD/lib"
+    MANAGED_SETUP=false
+fi
+
 function GetConfirmation() {
     echo -e "$1 (y/n)"
     read input
@@ -76,8 +86,7 @@ function PrepareLibWithDropbox() {
 
 function PrepareLibWithoutDropbox() {
     if GetConfirmation "現在のディレクトリ直下に lib/ を作成してよろしいですか？" ; then
-        LIB_DIRECTORY="./lib"
-        mkdir lib
+        mkdir -p "$LIB_DIRECTORY"
 
 	if GetConfirmation "Download all libraries included in AppsToSetup from my repositories BY GIT CLONE." ; then
             for app in "${AppsToSetup[@]}"
@@ -117,8 +126,10 @@ if GetConfirmation "Install following apps by apt?\n${AppsToInstall// /'\n'}\n" 
     sudo apt install -y $AppsToInstall
 fi
 
-# Download the library via Dropbox or curl, then set LIB_DIRECTORY.
-if GetConfirmation "Download the library for setup. Use Dropbox?" ; then
+# Reuse the managed lib on repeat runs; standalone runs can still choose Dropbox.
+if [ "$MANAGED_SETUP" = true ]; then
+    echo "Using existing library: $LIB_DIRECTORY"
+elif GetConfirmation "Download the library for setup. Use Dropbox?" ; then
     PrepareLibWithDropbox
 else
     PrepareLibWithoutDropbox
