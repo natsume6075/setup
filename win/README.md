@@ -70,85 +70,100 @@ choco install -y bitwarden evernote anki dropbox
 choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm line virtualbox
 ```
 
-#### WSL Linux コントリビューション
-
-choco search ubuntu して、新しいの入れる
-
 ## Chocolatey で入らないソフトたち
 
 - SylphyHorn: 仮想デスクトップの使い勝手向上。目的は、アニメーション無しでの切り替え・仮想デスクトップ間のウィンドウ移動。
 
-## WSL 設定
+## WSL2 — Ubuntu 24.04 LTS
 
-### WSL2 Ubuntu の更新（agent harness 用）
+Windows PowerShellから操作する。WSLの更新・Ubuntuの新規導入・旧ディストリビューションの削除は、次の順に行う。
 
-既存の Ubuntu 20.04 は削除せず、新しい Ubuntu 24.04 LTS を別ディストリビューションとして導入する。
-PowerShell で実行する。
+### 1. WSLを更新し、Ubuntu 24.04を導入する
 
 ```powershell
 wsl --update
 wsl --list --online
 wsl --install -d Ubuntu-24.04
 wsl --list --verbose
+wsl -d Ubuntu-24.04
 ```
 
-Ubuntu-24.04 の初回起動時にユーザーを作成する。セットアップ後の起動は `wsl -d Ubuntu-24.04`。
-移行を検証するまで、古いディストリビューションに `wsl --unregister` を実行しない。
+Ubuntu初回起動時にLinuxユーザー名とパスワードを設定する。Ubuntuのターミナルで以下を実行し、24.04の起動とネットワークを確認する。
 
-#### DNS / VPN / Proxy トラブル
+```bash
+cat /etc/os-release
+getent hosts archive.ubuntu.com
+sudo apt update
+```
 
-古い `/etc/resolv.conf` 固定書き換えの前に、WSL更新と DNS tunneling を確認する。
-Windows 11 22H2 以降の新しいWSLでは、通常 `dnsTunneling=true` が既定で有効。必要なら `%UserProfile%\.wslconfig` の既存内容を確認し、**上書きせず** `[wsl2]` セクションへ追加する。
+問題なければPowerShellへ戻り、Ubuntu 24.04を既定のディストリビューションにする。
+
+```powershell
+wsl --set-default Ubuntu-24.04
+wsl --list --verbose
+```
+
+### 2. DNS・VPN・プロキシのトラブルシュート
+
+まず `wsl --update`、Windows側のVPN・プロキシ設定、新Ubuntuでの `getent hosts archive.ubuntu.com` と `sudo apt update` の結果を確認する。古い環境の `/etc/resolv.conf` をそのままコピーしない。
+
+Windows 11 22H2以降では、DNS tunnelingは通常既定で有効。DNS解決に失敗する場合のみ、PowerShellで `notepad $env:USERPROFILE\.wslconfig` を開き、既存内容を保ったまま以下を設定する（既に `[wsl2]` があれば重複させず、その下に追加）。
 
 ```ini
 [wsl2]
 dnsTunneling=true
-# 会社のプロキシを Windows 側から継承する必要がある場合だけ:
+# Windows側でHTTPプロキシを利用している場合だけ必要に応じて:
 # autoProxy=true
 ```
 
-`wsl --shutdown` で反映。Ubuntuで `getent hosts archive.ubuntu.com` と `sudo apt update` を確認する。
-企業のVPN/Proxyが必要な環境では、既存の `linux/setup.sh` の設定方法を参照しつつ、まずWindows側のネットワーク設定を確認する。DNSだけでなくTLSやproxyの問題も切り分ける。
+変更したらPowerShellで `wsl --shutdown` を実行し、Ubuntuを再起動して名前解決・aptを再検証する。DNS解決、HTTPプロキシ、証明書の問題は分けて切り分ける。
 
-- [WSLインストール (Microsoft)](https://learn.microsoft.com/windows/wsl/install)
-- [WSL DNS tunneling・proxy (Microsoft)](https://learn.microsoft.com/windows/wsl/networking)
-- [WSL .wslconfig (Microsoft)](https://learn.microsoft.com/windows/wsl/wsl-config)
+- [WSLインストール — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/install)
+- [WSL DNS・ネットワーク — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/networking)
+- [WSL .wslconfig — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/wsl-config)
 
-#### Koofr（Windows側）
+### 3. 旧Ubuntuディストリビューションを削除する
 
-[Koofr Desktop](https://koofr.eu/) をWindowsにインストールし、ログイン・同期フォルダ指定を行う。
-WSL内へ二重にKoofrをインストールしない。WSLからは `/mnt/c/Users/<ユーザー名>/...` の実際の同期フォルダを使う。
-Gitの作業ツリーはWSL側に置き、KoofrはObsidian Vault・成果物を同期する。
+**新Ubuntuの起動・ネットワークが正常であることを確認してから行う。** 旧ディストリビューション内のファイル・設定・インストール済みアプリは `wsl --unregister` で完全に消える。必要なGit未pushの変更、SSH鍵、dotfiles、個人ファイルなどがないか先に確認する。
 
-### Codexの導入
+PowerShellで登録名を確認し、**旧Ubuntuに一致する正確な名前**を指定する。以下の `Ubuntu-20.04` は例。実際には `Ubuntu` など別の名前になっている場合がある。
 
-Ubuntu-24.04で [linux/README.md](../linux/README.md) の共通 `setup.sh` を実行し、`AppsToSetup` の `agent-workspace` を選択する。Codexの導入処理は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) にある。
+```powershell
+wsl --list --verbose
+wsl -d Ubuntu-20.04 -- cat /etc/os-release
+```
 
-#### iPhoneのObsidianとKoofr Sync
+必要なデータの退避には、旧ディストリビューション全体をWindows側へエクスポートできる。バックアップファイルは機密情報を含み得るため安全に保管する。
 
-iPhoneの標準「ファイル」アプリからKoofrのフォルダをそのままObsidian Vaultとして開くことはできない。Obsidian内のローカルVaultをKoofr Syncプラグインでクラウドと同期する。
+```powershell
+wsl --export Ubuntu-20.04 "$env:USERPROFILE\ubuntu20-backup.tar"
+Get-Item "$env:USERPROFILE\ubuntu20-backup.tar"
+```
 
-1. [Koofr](https://koofr.eu/) のWeb設定から**アプリ専用パスワード**を作成する（通常パスワードや秘密情報をリポジトリに保存しない）。
-2. iPhoneのObsidianでローカルVaultを作り、設定 → Community Plugins → Browse から [Koofr Sync](https://community.obsidian.md/plugins/koofr-sync) をインストール・有効化。
-3. Koofr Sync設定にメールアドレス・アプリ専用パスワードを入力し、PCで同期しているVaultの**同じクラウドフォルダ**を指定。
-4. 自動同期と競合処理を確認し、**PCでテストノート作成 → iPhoneに反映 → iPhoneで編集 → PCに反映** の往復テストを行う。
-5. 同期はバックアップではない。誤削除・競合に備え、別媒体で履歴バックアップを用意し、復元も検証する。
+**確認した旧ディストリビューションだけ**を削除する。バックアップと必要データの確認後、以下を実行する。
 
-- [Koofr Sync公式実装とセットアップ](https://github.com/bartekmp/koofr-obsidian-sync)
-- [Koofr Sync — Obsidianプラグイン](https://community.obsidian.md/plugins/koofr-sync)
+```powershell
+wsl --unregister Ubuntu-20.04
+wsl --list --verbose
+```
 
-#### この環境に関する人力操作と検証
+上の3箇所の `Ubuntu-20.04` は、すべて実際の旧ディストリビューション名に置き換える。**`Ubuntu-24.04` を指定しないこと。**
 
-以下はOSやアプリのログイン・実機テストが必要で、自動セットアップでは実行しない。
+- [WSLのエクスポート・登録解除 — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/basic-commands)
 
-- Windowsから新しいUbuntu 24.04を起動・初期ユーザー作成し、旧20.04を温存。
-- 新UbuntuでDNS/Proxyを確認して [Linux用のCodexセットアップ](../linux/README.md) を実施。
-- CodexのChatGPT認証（`codex login`）とワークスペース内での初回起動。
-- Koofr Desktop導入・ログイン・同期先選択、iPhoneでのKoofr Sync有効化と往復テスト。
-- 外部サービス接続（Google / Slack / LINE / GitHub）のOAuthや権限承認、Remote Controlの実機検証。
-- 検証後に [setup Draft PR #2](https://github.com/natsume6075/setup/pull/2) をレビューし、問題がなければ `master` へマージ。
+### 4. Linux環境とCodexをセットアップする
 
-作業の状態・Codexへの恒久的な引き継ぎは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
+[linux/README.md](../linux/README.md) にある共通の `setup.sh` をUbuntu 24.04で実行し、`AppsToSetup` の `agent-workspace` を選択する。Codex固有の導入は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) に集約している。
+
+PR検証中は `setup` の `feat/add-agent-harness` を取得して実行する。Linuxセットアップの動作検証後、[PR #2](https://github.com/natsume6075/setup/pull/2) をレビュー・マージする。ログイン後の作業と残タスクは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
+
+### 5. KoofrとiPhone Obsidian
+
+[Koofr Desktop](https://koofr.eu/) をWindowsに導入してログインし、同期フォルダを設定する。WSLからはWindows側の実際の同期パス（通常 `/mnt/c/Users/<ユーザー名>/...`）を参照する。**Gitの作業ツリーをKoofrで二重同期しない。**
+
+iPhoneではObsidianのローカルVaultに [Koofr Sync](https://github.com/bartekmp/koofr-obsidian-sync) プラグインをインストールし、Koofrのアプリ専用パスワードとPC側のVaultに対応するクラウドフォルダを設定する。PCでテストノートを作る→iPhoneで確認・編集する→PCで反映を確認する、という往復テストを行う。同期はバックアップの代用にならない。
+
+外部サービスのOAuth/認証、Remote Controlの実機検証、バックアップは、[agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) に引き継ぐ。
 
 ## Windows-Termianl 設定
 
