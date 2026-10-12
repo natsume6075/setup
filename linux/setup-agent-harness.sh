@@ -14,10 +14,15 @@ fi
 sudo apt-get update
 sudo apt-get install -y curl git ca-certificates unzip
 
+# Install Node LTS through nvm only when Node/npm are unavailable.
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-    echo "Node.js/npm not found. Install Node.js LTS with nvm: https://github.com/nvm-sh/nvm"
-    echo "After installing nvm and 'nvm install --lts', rerun this script."
-    exit 1
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+    fi
+    # shellcheck source=/dev/null
+    . "$NVM_DIR/nvm.sh"
+    nvm install --lts
 fi
 
 npm install -g @openai/codex@latest
