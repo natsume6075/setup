@@ -158,19 +158,11 @@ wsl --list --verbose
 
 - [WSLのエクスポート・登録解除 — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/basic-commands)
 
-### 4. Linux環境とCodexをセットアップする
-
-[linux/README.md](../linux/README.md) にある共通の `setup.sh` をUbuntu 26.04で実行し、`AppsToSetup` の `agent-workspace` を選択する。Codex固有の導入は [agent-workspace/setup.sh](https://github.com/natsume6075/agent-workspace/blob/main/setup.sh) に集約している。
-
-Ubuntu 26.04では従来のアプリ（neovim PPA、Python等）の互換性に差が出る可能性があるため、各アプリのインストール結果を確認する。PR検証中は `setup` の `feat/add-agent-harness` を取得して実行する。Linuxセットアップの動作検証後、[PR #2](https://github.com/natsume6075/setup/pull/2) をレビュー・マージする。ログイン後の作業と残タスクは [agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) で管理する。
-
-### 5. KoofrとiPhone Obsidian
+## Koofr・iPhone Obsidian
 
 [Koofr Desktop](https://koofr.eu/) をWindowsに導入してログインし、同期フォルダを設定する。WSLからはWindows側の実際の同期パス（通常 `/mnt/c/Users/<ユーザー名>/...`）を参照する。**Gitの作業ツリーをKoofrで二重同期しない。**
 
 iPhoneではObsidianのローカルVaultに [Koofr Sync](https://github.com/bartekmp/koofr-obsidian-sync) プラグインをインストールし、Koofrのアプリ専用パスワードとPC側のVaultに対応するクラウドフォルダを設定する。PCでテストノートを作る→iPhoneで確認・編集する→PCで反映を確認する、という往復テストを行う。同期はバックアップの代用にならない。
-
-外部サービスのOAuth/認証、Remote Controlの実機検証、バックアップは、[agent-workspaceのタスク台帳](https://github.com/natsume6075/agent-workspace/blob/main/.agents/docs/TASKS.md) に引き継ぐ。
 
 ## Windows-Termianl 設定
 
