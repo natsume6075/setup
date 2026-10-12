@@ -8,7 +8,7 @@ bash setup.sh
 rm setup.sh
 ```
 
-WSL で "Could not resolve host" のエラーが出る場合は https://github.com/microsoft/WSL/issues/4285
+WSL でDNSエラーが出る場合は、まず [Windows側のWSL/DNS手順](../win/README.md) を参照。古い固定DNSの変更を行う前にWSL更新とDNS tunnelingを確認する。
 
 社内プロキシ環境下では、初回実行時にプロキシ URL の入力を求められる。入力すると `~/.proxy_env` が生成され、apt・git・curl のネットワーク設定が自動で行われる。
 
@@ -60,4 +60,3 @@ github で登録
 omf install pure
 omf theme pure
 ```
-

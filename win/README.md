@@ -70,25 +70,99 @@ choco install -y bitwarden evernote anki dropbox
 choco install -y pandoc xmind steam adb mpc-hc wireshark androidstudio teraterm line virtualbox
 ```
 
-#### WSL Linux コントリビューション
-
-choco search ubuntu して、新しいの入れる
-
 ## Chocolatey で入らないソフトたち
 
 - SylphyHorn: 仮想デスクトップの使い勝手向上。目的は、アニメーション無しでの切り替え・仮想デスクトップ間のウィンドウ移動。
 
-## WSL 設定
+## WSL 3.0系 / Ubuntu 26.04 LTS
 
-### WSL install
+Windows PowerShellから操作する。WSL本体は最新の**正式版（3.0系）**に更新し、Ubuntu 26.04 LTSを新規導入する。実行方式は従来どおり**WSL2**であり、`wsl --list --verbose` の `VERSION=2` は正常。
 
-https://aka.ms/wslinstall
+WSLの更新・Ubuntuの新規導入・旧ディストリビューションの削除は、次の順に行う。
 
-### linux に入る
+### 1. WSLを更新し、Ubuntu 26.04を導入する
 
-- ubuntu アプリを起動
-- アカウント情報入れる
-- terminal でプロファイルが参照できるようになる
+```powershell
+wsl --update
+wsl --version
+wsl --list --online
+wsl --install -d Ubuntu-26.04
+wsl --list --verbose
+wsl -d Ubuntu-26.04
+```
+
+Ubuntu初回起動時にLinuxユーザー名とパスワードを設定する。PowerShellの `wsl --version` でWSL本体のバージョンを確認する（`wsl --list --verbose` のVERSIONは実行方式の1/2を示す）。更新しても3.0系にならない場合は、OS・WSLの対応状況を先に確認し、プレリリースを無理に導入しない。
+
+Ubuntuのターミナルで以下を実行し、26.04の起動とネットワークを確認する。
+
+```bash
+cat /etc/os-release
+getent hosts archive.ubuntu.com
+sudo apt update
+```
+
+問題なければPowerShellへ戻り、Ubuntu 26.04を既定のディストリビューションにする。
+
+```powershell
+wsl --set-default Ubuntu-26.04
+wsl --list --verbose
+```
+
+### 2. DNS・VPN・プロキシのトラブルシュート
+
+まず `wsl --update`、Windows側のVPN・プロキシ設定、新Ubuntuでの `getent hosts archive.ubuntu.com` と `sudo apt update` の結果を確認する。古い環境の `/etc/resolv.conf` をそのままコピーしない。
+
+Windows 11 22H2以降では、DNS tunnelingは通常既定で有効。DNS解決に失敗する場合のみ、PowerShellで `notepad $env:USERPROFILE\.wslconfig` を開き、既存内容を保ったまま以下を設定する（既に `[wsl2]` があれば重複させず、その下に追加）。
+
+```ini
+[wsl2]
+dnsTunneling=true
+# Windows側でHTTPプロキシを利用している場合だけ必要に応じて:
+# autoProxy=true
+```
+
+変更したらPowerShellで `wsl --shutdown` を実行し、Ubuntuを再起動して名前解決・aptを再検証する。DNS解決、HTTPプロキシ、証明書の問題は分けて切り分ける。
+
+- [Ubuntu 26.04 LTSのWSL導入 — Canonical](https://ubuntu.com/wsl/docs/latest/howto/install-ubuntu-wsl2/)
+- [WSL 3.0.1リリース — Microsoft](https://github.com/microsoft/WSL/releases/tag/3.0.1)
+- [WSLインストール — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/install)
+- [WSL DNS・ネットワーク — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/networking)
+- [WSL .wslconfig — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/wsl-config)
+
+### 3. 旧Ubuntuディストリビューションを削除する
+
+**新Ubuntuの起動・ネットワークが正常であることを確認してから行う。** 旧ディストリビューション内のファイル・設定・インストール済みアプリは `wsl --unregister` で完全に消える。必要なGit未pushの変更、SSH鍵、dotfiles、個人ファイルなどがないか先に確認する。
+
+PowerShellで登録名を確認し、**旧Ubuntuに一致する正確な名前**を指定する。以下の `Ubuntu-20.04` は例。実際には `Ubuntu` など別の名前になっている場合がある。
+
+```powershell
+wsl --list --verbose
+wsl -d Ubuntu-20.04 -- cat /etc/os-release
+```
+
+必要なデータの退避には、旧ディストリビューション全体をWindows側へエクスポートできる。バックアップファイルは機密情報を含み得るため安全に保管する。
+
+```powershell
+wsl --export Ubuntu-20.04 "$env:USERPROFILE\ubuntu20-backup.tar"
+Get-Item "$env:USERPROFILE\ubuntu20-backup.tar"
+```
+
+**確認した旧ディストリビューションだけ**を削除する。バックアップと必要データの確認後、以下を実行する。
+
+```powershell
+wsl --unregister Ubuntu-20.04
+wsl --list --verbose
+```
+
+上の3箇所の `Ubuntu-20.04` は、すべて実際の旧ディストリビューション名に置き換える。**`Ubuntu-26.04` を指定しないこと。**
+
+- [WSLのエクスポート・登録解除 — Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/basic-commands)
+
+## Koofr・iPhone Obsidian
+
+[Koofr Desktop](https://koofr.eu/) をWindowsに導入してログインし、同期フォルダを設定する。WSLからはWindows側の実際の同期パス（通常 `/mnt/c/Users/<ユーザー名>/...`）を参照する。**Gitの作業ツリーをKoofrで二重同期しない。**
+
+iPhoneではObsidianのローカルVaultに [Koofr Sync](https://github.com/bartekmp/koofr-obsidian-sync) プラグインをインストールし、Koofrのアプリ専用パスワードとPC側のVaultに対応するクラウドフォルダを設定する。PCでテストノートを作る→iPhoneで確認・編集する→PCで反映を確認する、という往復テストを行う。同期はバックアップの代用にならない。
 
 ## Windows-Termianl 設定
 
