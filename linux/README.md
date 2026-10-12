@@ -55,15 +55,11 @@ node --version
 npm --version
 codex --version
 
-# lib の配置確認: 実際の配置先を指定する
-LIB_DIRECTORY=/work/lib
-ls -la "$LIB_DIRECTORY"
-
 # agent-workspace のリンク（セットアップ時の既定位置を選んだ場合）
 readlink -f ~/agent-workspace
 ```
 
-リンク先が `$LIB_DIRECTORY/agent-workspace` と一致していることを確認する。リンクの場所をカスタマイズした場合は読み替える。
+出力が実際の `agent-workspace` リポジトリを指していることを確認する。リンクの場所をカスタマイズした場合は読み替える。
 
 ## そのた自動化していないこと
 
