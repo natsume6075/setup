@@ -65,7 +65,7 @@ omf theme pure
 ## Agent harness (Codex / WSL2)
 
 既存の `setup.sh` は変更せず、Codex用の追加セットアップを独立スクリプトで実施する。
-先にWindowsの [WSL設定](../win/README.md#﹅wsl-設定) で Ubuntu 24.04 LTSを準備する。
+先にWindowsの [WSL設定](../win/README.md) で Ubuntu 24.04 LTSを準備する。
 
 ```bash
 # Ubuntu 24.04 のターミナルで実行
