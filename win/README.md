@@ -80,15 +80,49 @@ choco search ubuntu して、新しいの入れる
 
 ## WSL 設定
 
-### WSL install
+### WSL2 Ubuntu の更新（agent harness 用）
 
-https://aka.ms/wslinstall
+既存の Ubuntu 20.04 は削除せず、新しい Ubuntu 24.04 LTS を別ディストリビューションとして導入する。
+PowerShell で実行する。
 
-### linux に入る
+```powershell
+wsl --update
+wsl --list --online
+wsl --install -d Ubuntu-24.04
+wsl --list --verbose
+```
 
-- ubuntu アプリを起動
-- アカウント情報入れる
-- terminal でプロファイルが参照できるようになる
+Ubuntu-24.04 の初回起動時にユーザーを作成する。セットアップ後の起動は `wsl -d Ubuntu-24.04`。
+移行を検証するまで、古いディストリビューションに `wsl --unregister` を実行しない。
+
+#### DNS / VPN / Proxy トラブル
+
+古い `/etc/resolv.conf` 固定書き換えの前に、WSL更新と DNS tunneling を確認する。
+Windows 11 22H2 以降の新しいWSLでは、通常 `dnsTunneling=true` が既定で有効。必要なら `%UserProfile%\.wslconfig` の既存内容を確認し、**上書きせず** `[wsl2]` セクションへ追加する。
+
+```ini
+[wsl2]
+dnsTunneling=true
+# 会社のプロキシを Windows 側から継承する必要がある場合だけ:
+# autoProxy=true
+```
+
+`wsl --shutdown` で反映。Ubuntuで `getent hosts archive.ubuntu.com` と `sudo apt update` を確認する。
+企業のVPN/Proxyが必要な環境では、既存の `linux/setup.sh` の設定方法を参照しつつ、まずWindows側のネットワーク設定を確認する。DNSだけでなくTLSやproxyの問題も切り分ける。
+
+- [WSLインストール (Microsoft)](https://learn.microsoft.com/windows/wsl/install)
+- [WSL DNS tunneling・proxy (Microsoft)](https://learn.microsoft.com/windows/wsl/networking)
+- [WSL .wslconfig (Microsoft)](https://learn.microsoft.com/windows/wsl/wsl-config)
+
+#### Koofr（Windows側）
+
+[Koofr Desktop](https://koofr.eu/) をWindowsにインストールし、ログイン・同期フォルダ指定を行う。
+WSL内へ二重にKoofrをインストールしない。WSLからは `/mnt/c/Users/<ユーザー名>/...` の実際の同期フォルダを使う。
+Gitの作業ツリーはWSL側に置き、KoofrはObsidian Vault・成果物を同期する。
+
+### Codexの導入
+
+Ubuntu-24.04で [linux/README.md](../linux/README.md) の agent harness セクションに従う。
 
 ## Windows-Termianl 設定
 
