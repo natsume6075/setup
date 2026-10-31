@@ -96,3 +96,22 @@ github で登録
 omf install pure
 omf theme pure
 ```
+
+## オプション: ローカルLLM用Docker / GitHub CLI
+
+通常の `linux/setup.sh` からは自動実行しない。必要な機能だけ個別に導入する。
+
+```bash
+# Ubuntu 26.04 / WSL2専用。Docker Engine・Compose・NVIDIA Container Toolkitを導入。
+sudo bash linux/setup-local-llm-docker.sh
+# UbuntuのaptパッケージからGitHub CLIを導入。
+sudo bash linux/setup-github-cli.sh
+gh auth login --hostname github.com --git-protocol https --web
+gh auth setup-git
+```
+
+Docker導入は公式Docker/NVIDIA aptリポジトリを追加し、Docker runtimeを構成してサービスを再起動する。既存の競合パッケージ/対象リポジトリ定義があれば停止するため、汎用の再実行スクリプトではない。daemon.jsonが存在する場合は変更前にバックアップする。WindowsのGPUドライバー、sudoers、dockerグループ所属は変更しない。
+
+Ollamaのコンテナ・モデル・起動コマンドは独立した [local-llm](https://github.com/natsume6075/local-llm) リポジトリ（private、アクセス権が必要）を `~/llm/` で管理する。モデル重みやコンテナ本体はこのsetup repoへ保存しない。
+
+GitHubログインは通常ユーザーが本人操作で実施し、キーやトークンをチャット/Gitへ転記しない。dotfilesの `.gitconfig` をsymlinkで使う場合は、認証helper設定をdotfilesで案内する `~/.config/git/local.inc` に置く。
