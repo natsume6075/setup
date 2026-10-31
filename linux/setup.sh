@@ -1,9 +1,9 @@
 #!/bin/bash
-AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip"
+AppsToInstall="zsh neovim tmux tree xdg-utils zip python3-pip gh"
 # AppsToInstall="fish zsh neovim tmux tree xdg-utils zip python3-pip"
-AppsToSetup=(dotfiles nvim bin agent-workspace)
+AppsToSetup=(dotfiles nvim bin agent-workspace local-llm local-image-gen)
 # Fetch setup itself, but execute setup.sh only for AppsToSetup entries.
-ReposToFetch=(setup "${AppsToSetup[@]}")
+ReposToFetch=(setup dotfiles nvim bin agent-workspace) # Private AI repos are fetched only after y.
 # AppsToSetup=(dotfiles nvim fish bin)
 
 # A standalone script uses the caller's directory. The managed copy uses its own lib.
@@ -69,6 +69,7 @@ CheckAptCommands() {
     HealthCheck 'apt/xdg-open' xdg-open --version || true
     HealthCheck 'apt/zip' zip -v || true
     HealthCheck 'apt/pip3' pip3 --version || true
+    HealthCheck 'apt/gh' gh --version || true
 }
 
 CheckApp() {
@@ -102,15 +103,12 @@ CheckApp() {
 }
 
 function GetConfirmation() {
-    echo -e "$1 (y/n)"
-    read input
-    if [ "$input" = 'y' ] ; then
-        return 0
-    elif [ "$input" = 'n' ] ; then
-        return 1
-    else
-        GetConfirmation "$1"
-    fi
+    local input
+    while true; do
+        echo -e "$1 (y/n)"
+        read -r input || return 1
+        case "$input" in y) return 0;; n) return 1;; esac
+    done
 }
 
 # ネットワーク設定を行う。初回のみ対話入力で ~/.proxy_env を生成し、以降はそれを読む。
@@ -267,7 +265,16 @@ do
     echo ""
     if GetConfirmation "Set up $app?" ; then
         echo "--- start setup $app ---"
-        bash "$LIB_DIRECTORY/$app/setup.sh" || { LogFailure "setup/$app" "Child setup exited nonzero (see terminal output or child logs)."; exit 1; }
+        app_dir="$LIB_DIRECTORY/$app"
+        # Preserve existing standalone locations; fresh clones use lib/repository-name.
+        case "$app" in
+            local-llm) [[ -d "$HOME/llm" ]] && app_dir="$HOME/llm" ;;
+            local-image-gen) [[ -d "$HOME/image-gen" ]] && app_dir="$HOME/image-gen" ;;
+        esac
+        if [[ ! -e "$app_dir" && ! -L "$app_dir" ]]; then
+            git clone "https://github.com/natsume6075/$app.git" "$app_dir" || exit 1
+        fi
+        bash "$app_dir/setup.sh" || { LogFailure "setup/$app" "Child setup exited nonzero (see terminal output or child logs)."; exit 1; }
         CheckApp "$app"
         echo "--- finish setup $app ---"
     else

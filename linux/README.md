@@ -97,21 +97,16 @@ omf install pure
 omf theme pure
 ```
 
-## オプション: ローカルLLM用Docker / GitHub CLI
+## ローカルAIとGitHub CLI
 
-通常の `linux/setup.sh` からは自動実行しない。必要な機能だけ個別に導入する。
+`gh` は `AppsToInstall` に含み、apt導入のy/n選択に従う。認証は通常ユーザーが `gh auth login` で行う。
 
-```bash
-# Ubuntu 26.04 / WSL2専用。Docker Engine・Compose・NVIDIA Container Toolkitを導入。
-sudo bash linux/setup-local-llm-docker.sh
-# UbuntuのaptパッケージからGitHub CLIを導入。
-sudo bash linux/setup-github-cli.sh
-gh auth login --hostname github.com --git-protocol https --web
-gh auth setup-git
-```
+`local-llm` と `local-image-gen` は `AppsToSetup` のy/n選択後、それぞれのリポジトリ直下の `setup.sh` を実行する。privateリポジトリは選択した場合だけHTTPSでcloneするため、事前にGitHub認証が必要。`n` では取得・導入・検証をしない。
+既存の `~/llm` と `~/image-gen` を優先し、新規取得時は通常どおり `lib/<repo名>` を使用する。既存ディレクトリは更新・上書きしない。
 
-Docker導入は公式Docker/NVIDIA aptリポジトリを追加し、Docker runtimeを構成してサービスを再起動する。既存の競合パッケージ/対象リポジトリ定義があれば停止するため、汎用の再実行スクリプトではない。daemon.jsonが存在する場合は変更前にバックアップする。WindowsのGPUドライバー、sudoers、dockerグループ所属は変更しない。
+- local-llm: Docker/GPU基盤、Ollama、モデル、コマンド登録を所有する。必要なら子setup内でもy/n確認する。
+- local-image-gen: Docker/GPU基盤はlocal-llmの `setup.sh --host-only` を再利用し、ComfyUI・SD 1.5・CLIを導入する。
+- モデル重みと生成画像は各プロジェクトのGit対象外。手順・検証・復元方法は各READMEを参照。
 
-Ollamaのコンテナ・モデル・起動コマンドは独立した [local-llm](https://github.com/natsume6075/local-llm) リポジトリ（private、アクセス権が必要）を `~/llm/` で管理する。モデル重みやコンテナ本体はこのsetup repoへ保存しない。
-
-GitHubログインは通常ユーザーが本人操作で実施し、キーやトークンをチャット/Gitへ転記しない。dotfilesの `.gitconfig` をsymlinkで使う場合は、認証helper設定をdotfilesで案内する `~/.config/git/local.inc` に置く。
+旧 `setup-local-llm-docker.sh` と `setup-github-cli.sh` は廃止。中央の `setup.sh` または各repoの `setup.sh` を通常ユーザーで実行する。sudoers・dockerグループ・Windows GPUドライバーは変更しない。
+GitHub認証情報をGitやチャットへ記録しない。dotfiles利用時の認証helperは `~/.config/git/local.inc` に置く。
