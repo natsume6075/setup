@@ -107,6 +107,3 @@ omf theme pure
 - local-llm: Docker/GPU基盤、Ollama、モデル、コマンド登録を所有する。必要なら子setup内でもy/n確認する。
 - local-image-gen: Docker/GPU基盤はlocal-llmの `setup.sh --host-only` を再利用し、ComfyUI・SD 1.5・CLIを導入する。
 - モデル重みと生成画像は各プロジェクトのGit対象外。手順・検証・復元方法は各READMEを参照。
-
-旧 `setup-local-llm-docker.sh` と `setup-github-cli.sh` は廃止。中央の `setup.sh` または各repoの `setup.sh` を通常ユーザーで実行する。sudoers・dockerグループ・Windows GPUドライバーは変更しない。
-GitHub認証情報をGitやチャットへ記録しない。dotfiles利用時の認証helperは `~/.config/git/local.inc` に置く。
