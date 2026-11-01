@@ -96,14 +96,3 @@ github で登録
 omf install pure
 omf theme pure
 ```
-
-## ローカルAIとGitHub CLI
-
-`gh` は `AppsToInstall` に含み、apt導入のy/n選択に従う。認証は通常ユーザーが `gh auth login` で行う。
-
-`local-llm` と `local-image-gen` は `AppsToSetup` のy/n選択後、それぞれのリポジトリ直下の `setup.sh` を実行する。privateリポジトリは選択した場合だけHTTPSでcloneするため、事前にGitHub認証が必要。`n` では取得・導入・検証をしない。
-既存の `~/llm` と `~/image-gen` を優先し、新規取得時は通常どおり `lib/<repo名>` を使用する。既存ディレクトリは更新・上書きしない。
-
-- local-llm: Docker/GPU基盤、Ollama、モデル、コマンド登録を所有する。必要なら子setup内でもy/n確認する。
-- local-image-gen: Docker/GPU基盤はlocal-llmの `setup.sh --host-only` を再利用し、ComfyUI・SD 1.5・CLIを導入する。
-- モデル重みと生成画像は各プロジェクトのGit対象外。手順・検証・復元方法は各READMEを参照。
